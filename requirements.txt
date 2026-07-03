@@ -1,0 +1,11 @@
+streamlit
+pandas
+requests
+plotly
+feedparser
+anthropic
+python-dotenv
+reportlab
+beautifulsoup4
+openpyxl
+xlrd
