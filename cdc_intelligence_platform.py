@@ -71,7 +71,6 @@ KCC_LOGO_WHITE = image_b64("logo_white_t.png")
 KCC_VIDEO_THUMB = image_b64("kcc_company_video_thumb.jpg")
 KCC_CERT_BADGES = image_b64("kcc_certification_badges.png")
 KCC_4RE_IMAGE = image_b64("kcc_4re_solution.png")
-KCC_ACOUSTIC_IMAGE = image_b64("kcc_acoustic_layer_13db.png")
 KCC_BROCHURE_FILE = "kcc_lvt_blue_brochure_2026.pdf"
 CDC_HERO_IMAGES = [
     image_b64("cdc_hero_facility_parking.png"),
@@ -287,12 +286,20 @@ st.markdown(
 .dark-data-table tbody td {{ background:#120D0F; color:#DDE5F0; padding:9px 11px; border-top:1px solid rgba(255,255,255,.06); vertical-align:top; }}
 .dark-data-table tbody tr:nth-child(even) td {{ background:#171012; }}
 .dark-data-table tbody tr:hover td {{ background:#211418; }}
-.playbook-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }}
-.play-card {{ background:linear-gradient(180deg,#171012,#100B0D); border:1px solid {LINE}; border-radius:8px; padding:13px; min-height:168px; }}
+.playbook-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:10px; }}
+.play-card {{ background:linear-gradient(180deg,#171012,#100B0D); border:1px solid {LINE}; border-top:2px solid rgba(239,0,31,.62); border-radius:8px; padding:13px; min-height:128px; }}
 .play-k {{ color:{GOLD}; font-size:calc(10px * var(--ui-scale)); font-weight:900; text-transform:uppercase; }}
-.play-v {{ color:{INK}; font-size:calc(17px * var(--ui-scale)); font-weight:900; line-height:1.22; margin-top:7px; }}
-.play-d {{ color:#A8B2C0; font-size:calc(12px * var(--ui-scale)); line-height:1.45; margin-top:8px; }}
+.play-v {{ color:{INK}; font-size:calc(16px * var(--ui-scale)); font-weight:900; line-height:1.22; margin-top:7px; }}
+.play-d {{ color:#A8B2C0; font-size:calc(11px * var(--ui-scale)); line-height:1.45; margin-top:8px; }}
 .script-box {{ background:#0D1117; border:1px solid rgba(239,0,31,.28); border-left:4px solid {CDC_RED}; border-radius:8px; padding:13px; color:#F4F7FB; font-size:calc(15px * var(--ui-scale)); line-height:1.55; }}
+.spec-grid {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:10px 0 12px; }}
+.spec-card {{ background:#100B0D; border:1px solid {LINE}; border-radius:8px; padding:12px; }}
+.spec-k {{ color:#8F9AAD; font-size:calc(10px * var(--ui-scale)); font-weight:900; text-transform:uppercase; }}
+.spec-v {{ color:#FFFFFF; font-size:calc(19px * var(--ui-scale)); font-weight:950; margin-top:5px; }}
+.spec-d {{ color:#A8B2C0; font-size:calc(11px * var(--ui-scale)); line-height:1.35; margin-top:4px; }}
+.compare-card {{ background:linear-gradient(135deg,#1B0E12,#101217); border:1px solid rgba(255,255,255,.10); border-left:4px solid {GOLD}; border-radius:8px; padding:13px; margin:10px 0; }}
+.compare-title {{ color:#FFFFFF; font-size:calc(18px * var(--ui-scale)); font-weight:950; }}
+.compare-body {{ color:#C9D3EA; font-size:calc(12px * var(--ui-scale)); line-height:1.55; margin-top:6px; max-width:980px; }}
 .asset-img {{ width:100%; border-radius:8px; border:1px solid {LINE}; background:#FFFFFF; }}
 @media (max-width: 1400px) {{
   .top-meta {{ display:none; }}
@@ -301,7 +308,7 @@ st.markdown(
 }}
 @media (max-width: 860px) {{
   .care-grid {{ grid-template-columns:1fr; }}
-  .grid4, .grid6, .sku-grid, .timeline, .playbook-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
+  .grid4, .grid6, .sku-grid, .timeline, .playbook-grid, .spec-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:100%; }}
   .kcc-lockup {{ display:none; }}
   .hero-main {{ min-height:1140px; }}
@@ -309,7 +316,7 @@ st.markdown(
   .h1 {{ font-size:34px; }}
 }}
 @media (max-width: 700px) {{
-  .grid4, .grid6, .sku-grid, .timeline, .playbook-grid {{ grid-template-columns:1fr; }}
+  .grid4, .grid6, .sku-grid, .timeline, .playbook-grid, .spec-grid {{ grid-template-columns:1fr; }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .topbar {{ min-height:58px; padding:9px 12px; }}
   .top-meta {{ display:none; }}
@@ -463,14 +470,15 @@ def default_order_shipment_desk() -> pd.DataFrame:
 
 
 def sku_readiness_rows() -> pd.DataFrame:
+    launch_spec = '9" x 60" / 5.0 mm / 20 mil'
     return pd.DataFrame(
         [
-            ["PG-101", "Confirmed", '7" x 48" / 5.0 mm', "Ready", "Ready", "In progress", "In progress", "85%"],
-            ["PG-203", "Confirmed", '7" x 48" / 5.0 mm', "Ready", "Ready", "In progress", "In progress", "85%"],
-            ["PG-304", "Confirmed", '7" x 48" / 5.0 mm', "Ready", "Ready", "Ready", "In progress", "90%"],
-            ["PG-405", "Confirmed", '7" x 48" / 5.0 mm', "Review", "Ready", "In progress", "Pending", "70%"],
-            ["PG-506", "Confirmed", '7" x 48" / 5.0 mm', "Review", "Ready", "In progress", "Pending", "70%"],
-            ["PG-607", "Pending", '7" x 48" / 5.0 mm', "Pending", "Pending", "Pending", "Pending", "40%"],
+            ["PG-101", "Confirmed", launch_spec, "Ready", "Ready", "In progress", "In progress", "85%"],
+            ["PG-203", "Confirmed", launch_spec, "Ready", "Ready", "In progress", "In progress", "85%"],
+            ["PG-304", "Confirmed", launch_spec, "Ready", "Ready", "Ready", "In progress", "90%"],
+            ["PG-405", "Confirmed", launch_spec, "Review", "Ready", "In progress", "Pending", "70%"],
+            ["PG-506", "Confirmed", launch_spec, "Review", "Ready", "In progress", "Pending", "70%"],
+            ["PG-607", "Pending", launch_spec, "Pending", "Pending", "Pending", "Pending", "40%"],
         ],
         columns=["SKU", "Status", "Size / Spec", "Carton Artwork", "Label", "Hand Board", "1' Cut Sample", "Launch Readiness"],
     )
@@ -539,20 +547,29 @@ def sku_rows() -> list[dict[str, str]]:
 def sales_pitch_cards() -> list[dict[str, str]]:
     return [
         {
-            "k": "30-second pitch",
-            "v": "A managed LVT program with comfort, safety, design depth, and project-ready documentation.",
-            "d": "Use this when opening a dealer, builder, property manager, or commercial conversation.",
+            "k": "Lead proof",
+            "v": "Longest Annealing System",
+            "d": "Use this as the first manufacturing story: controlled stress relief for dimensional confidence.",
         },
         {
-            "k": "Proof point",
-            "v": "ASTM / EN test reports show PASS across dimensional stability, wear, flexibility, slip, heat, stain, and chemical resistance.",
-            "d": "Do not lead with test numbers. Use them after the customer raises a concern.",
+            "k": "LX switch story",
+            "v": "Comparable stability, easier handling",
+            "d": "Position KCC as a practical installer-friendly program, not just a replacement SKU.",
         },
         {
             "k": "Close line",
-            "v": "Permagrain gives CDC a practical launch line backed by KCC Glass manufacturing discipline.",
-            "d": "Position it as a managed program, not only another LVT SKU list.",
+            "v": "A documented launch line CDC can sell with confidence",
+            "d": "Back the pitch with certifications, slip data, surface design, ESG, and KCC manufacturing discipline.",
         },
+    ]
+
+
+def launch_spec_cards() -> list[dict[str, str]]:
+    return [
+        {"k": "Total thickness", "v": "5.0 mm", "d": "CDC launch construction"},
+        {"k": "Wear layer", "v": "0.50 mm", "d": "20 mil commercial-ready story"},
+        {"k": "Plank size", "v": '9" x 60"', "d": "Long plank residential + project appeal"},
+        {"k": "Core message", "v": "Balanced", "d": "Stable, flexible, installer-friendly"},
     ]
 
 
@@ -560,43 +577,76 @@ def objection_rows() -> pd.DataFrame:
     return pd.DataFrame(
         [
             [
-                "Dent / curl / deformation concern",
-                "The structure is designed for dimensional stability with annealing control and glass fiber reinforcement.",
+                "Will it stay stable?",
+                "Yes. Lead with KCC's Longest Annealing System and glass fiber reinforced construction.",
                 "ASTM F2199 dimensional stability and curl PASS; EN ISO 23999 PASS.",
-                "Use for builders, multifamily jobs, and customers worried about temperature or humidity movement.",
+                "Builders, multifamily, temperature / humidity concerns.",
             ],
             [
-                "Slip concern",
-                "The surface is designed to reduce slip risk in active commercial and residential spaces.",
+                "Why move from LX?",
+                "KCC gives CDC a similar stability story with a stronger workability and cutting story.",
+                "Technical feedback: KCC is not overly rigid, so knife cutting can feel smoother.",
+                "Dealer training, installer conversations, launch conversion.",
+            ],
+            [
+                "Will installers waste material?",
+                "The product is easier to cut and handle around stairs, walls, and tight finishing areas.",
+                "Smoother cutting can reduce loss and support faster installation work.",
+                "Project managers, installers, labor-sensitive jobs.",
+            ],
+            [
+                "Will scratches stand out?",
+                "Wood5 visuals help minor scratches look less noticeable in everyday use.",
+                "Surface design advantage: scratch visibility is reduced by the wood visual structure.",
+                "Retail showroom, family use, light commercial spaces.",
+            ],
+            [
+                "Is it safe underfoot?",
+                "Use the slip-resistance proof when the customer asks about active spaces.",
                 "DIN 51130 R11 rating; EN slip resistance R9-R11 PASS; ASTM slip tests PASS.",
-                "Use for healthcare, senior living, education, multifamily common areas, and retail showrooms.",
+                "Healthcare, education, multifamily common areas, retail.",
             ],
             [
-                "Noise / floor impact concern",
-                "The optional Acoustic Layer helps absorb impact sound and improve step comfort.",
-                "ISO 717-2 sound insulation test: 13dB for SENSELAY 5.0T Acoustic Layer.",
-                "Use for apartment, condo, hospitality, office, and upper-floor renovation conversations.",
-            ],
-            [
-                "Indoor air / documentation concern",
-                "The program is supported by recognized product and system certifications for specification packages.",
+                "Can we support bids?",
+                "Yes. The program has specification-ready product and system documentation.",
                 "FloorScore, GREENGUARD Gold, CE, HPD v2.3, Carbon Footprint, ISO 9001, ISO 14001.",
-                "Use for architects, designers, commercial bids, public projects, and documentation-driven accounts.",
-            ],
-            [
-                "Design sameness concern",
-                "Digital printing supports sharper visual clarity, natural shading, lower MOQ, and broader customization.",
-                "Digital printing enables wider color spectrum and reduced pattern repetition versus traditional gravure.",
-                "Use when a dealer wants a more differentiated story than basic oak colorways.",
-            ],
-            [
-                "Large project reliability concern",
-                "KCC Glass is not a small one-line supplier; it brings scale, design assets, and system-backed production.",
-                "Brochure profile: 6,000,000 m2 capacity, 2,045 employees, design assets, and in-house systems.",
-                "Use when CDC needs confidence for program expansion or larger project commitments.",
+                "Architects, designers, commercial bids, public projects.",
             ],
         ],
         columns=["Customer Objection", "How CDC Should Answer", "Proof To Use", "Best Sales Moment"],
+    )
+
+
+def competitive_rows() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            [
+                "Dimensional stability",
+                "Keep the message balanced: stability is comparable, and KCC adds a strong process story.",
+                "Longest Annealing System + ASTM F2199 / EN ISO 23999 PASS.",
+            ],
+            [
+                "Flexibility / workability",
+                "KCC should feel easier to cut and less overly rigid in real installation conditions.",
+                "Technical feedback: smoother knife cutting can reduce loss at stairs, walls, and edge finishing.",
+            ],
+            [
+                "Labor efficiency",
+                "Cleaner handling can help installers work faster and reduce material waste.",
+                "Use with contractors and project managers who care about labor time.",
+            ],
+            [
+                "Surface appearance",
+                "KCC's Wood5 visual helps minor scratches look less obvious.",
+                "Use for retail floors, family homes, pets, and showroom demonstrations.",
+            ],
+            [
+                "Color quality",
+                "Surface color stability is a key KCC confidence point.",
+                "Use when CDC wants a design-quality answer, not only a price answer.",
+            ],
+        ],
+        columns=["CDC Question", "KCC Answer", "Proof / Sales Use"],
     )
 
 
@@ -820,6 +870,20 @@ def render_play_cards(cards: list[dict[str, str]]) -> None:
   <div class="play-k">{card['k']}</div>
   <div class="play-v">{card['v']}</div>
   <div class="play-d">{card['d']}</div>
+</div>
+"""
+    html += "</div>"
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def render_spec_cards(cards: list[dict[str, str]]) -> None:
+    html = '<div class="spec-grid">'
+    for card in cards:
+        html += f"""
+<div class="spec-card">
+  <div class="spec-k">{card['k']}</div>
+  <div class="spec-v">{card['v']}</div>
+  <div class="spec-d">{card['d']}</div>
 </div>
 """
     html += "</div>"
@@ -1294,11 +1358,13 @@ elif view == "Permagrain SKU Room":
 
 elif view == "Sales Playbook":
     panel("CDC Sales Playbook", "how to sell Permagrain")
+    render_spec_cards(launch_spec_cards())
     st.markdown(
         """
 <div class="script-box">
-  <b>Say this first:</b> Permagrain is a CDC-ready LVT launch program backed by KCC Glass manufacturing discipline:
-  stable construction, safety documentation, acoustic comfort options, design depth, and ESG-ready project support.
+  <b>Say this first:</b> Permagrain is CDC's 5.0 mm / 20 mil / 9" x 60" KCC Glass LVT launch program.
+  Lead with the Longest Annealing System, balanced core handling, smoother cutting workability, Wood5 scratch visibility,
+  and project-ready certification support.
 </div>
 """,
         unsafe_allow_html=True,
@@ -1306,16 +1372,31 @@ elif view == "Sales Playbook":
     render_play_cards(sales_pitch_cards())
     close_panel()
 
-    panel("Objection-Handling Cards", "customer concern -> proof -> sales moment")
+    panel("KCC vs LX Sales Answer", "what CDC reps can say")
     st.markdown(
         """
-<div class="brief">
-  Use this table as a quick coaching sheet for CDC sales reps. The point is not to list test reports;
-  the point is to connect each report to the customer concern it answers.
+<div class="compare-card">
+  <div class="compare-title">Do not attack LX. Position KCC as the easier program to sell and install.</div>
+  <div class="compare-body">
+    The clean message is: comparable dimensional stability, stronger KCC process story, smoother cutting,
+    lower installation loss risk around difficult areas, and surface visuals that help minor scratches look less obvious.
+  </div>
 </div>
 """,
         unsafe_allow_html=True,
     )
+    competitive_table = competitive_rows()
+    render_table(competitive_table)
+    st.download_button(
+        "Download KCC vs LX sales answer",
+        competitive_table.to_csv(index=False).encode("utf-8-sig"),
+        "CDC_KCC_vs_LX_Sales_Answer.csv",
+        "text/csv",
+        width="stretch",
+    )
+    close_panel()
+
+    panel("Objection-Handling Cards", "customer concern -> proof -> sales moment")
     objection_table = objection_rows()
     render_table(objection_table)
     st.download_button(
@@ -1354,10 +1435,10 @@ elif view == "Sales Playbook":
         panel("30-Second Selling Points", "copy-ready scripts")
         scripts = pd.DataFrame(
             [
-                ["Builder / multifamily", "Lead with dimensional stability, acoustic comfort, and practical low-risk visuals."],
-                ["Retail dealer", "Lead with durable visuals, clear certification proof, and a managed launch program."],
-                ["Commercial / public bid", "Lead with FloorScore, GREENGUARD Gold, HPD, ISO systems, and ESG/4Re support."],
-                ["Design-driven account", "Lead with digital printing, broader color expression, lower MOQ, and design assets."],
+                ["Builder / multifamily", "Lead with dimensional stability, Longest Annealing, and installer-friendly handling."],
+                ["Retail dealer", "Lead with 5.0 mm / 20 mil / 9 x 60, Wood5 scratch visibility, and a managed launch program."],
+                ["Commercial / public bid", "Lead with FloorScore, GREENGUARD Gold, HPD, ISO systems, and ESG / 4Re support."],
+                ["Installer conversation", "Lead with smoother cutting, less over-rigid handling, and lower loss risk at stairs and walls."],
             ],
             columns=["Audience", "Tell Them This"],
         )
@@ -1386,27 +1467,23 @@ elif view == "Sales Playbook":
             )
         close_panel()
     with c4:
-        panel("Acoustic Layer Proof", "noise mitigation talking point")
-        render_asset_image(KCC_ACOUSTIC_IMAGE, "KCC Glass acoustic layer 13dB proof")
-        acoustic_rows = pd.DataFrame(
+        panel("Longest Annealing System", "manufacturing proof story")
+        annealing_rows = pd.DataFrame(
             [
-                ["Customer Concern", "Noise transfer, step comfort, upper-floor renovation risk."],
-                ["Sales Answer", "The optional Acoustic Layer helps absorb impact sound and improve everyday comfort."],
-                ["Proof", "ISO 717-2 sound insulation test: 13dB for SENSELAY 5.0T Acoustic Layer."],
-                ["Best Use", "Multifamily, condo, hospitality, office, and renovation projects."],
+                ["Customer Concern", "Will this LVT stay stable after installation?"],
+                ["Sales Answer", "KCC uses the Longest Annealing System as a process story for controlled stress relief."],
+                ["Proof", "Dimensional stability / curl PASS under ASTM F2199 and EN ISO 23999."],
+                ["Best Use", "Builders, multifamily projects, replacement work, and customers comparing KCC against LX."],
             ],
             columns=["Area", "Message"],
         )
-        render_table(acoustic_rows)
-        acoustic_img = local_file_bytes("kcc_acoustic_layer_13db.png")
-        if acoustic_img:
-            st.download_button(
-                "Download acoustic proof visual",
-                acoustic_img,
-                "KCC_Glass_Acoustic_Layer_13dB.png",
-                "image/png",
-                width="stretch",
-            )
+        st.markdown(
+            """
+<div class="meaning"><b>Customer line:</b> KCC does not rely only on a test result. The manufacturing process itself is part of the stability story.</div>
+""",
+            unsafe_allow_html=True,
+        )
+        render_table(annealing_rows)
         close_panel()
 
     panel("Source Material", "brochure download")
