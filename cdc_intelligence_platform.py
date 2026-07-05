@@ -69,6 +69,10 @@ CDC_TAGLINE_LOGO = image_b64("cdc_logo_tagline_mark.png")
 TIMELESS_LOGO = image_b64("timeless_designs_logo_crop.png") or image_b64("timeless_designs_logo.png")
 KCC_LOGO_WHITE = image_b64("logo_white_t.png")
 KCC_VIDEO_THUMB = image_b64("kcc_company_video_thumb.jpg")
+KCC_CERT_BADGES = image_b64("kcc_certification_badges.png")
+KCC_4RE_IMAGE = image_b64("kcc_4re_solution.png")
+KCC_ACOUSTIC_IMAGE = image_b64("kcc_acoustic_layer_13db.png")
+KCC_BROCHURE_FILE = "kcc_lvt_blue_brochure_2026.pdf"
 CDC_HERO_IMAGES = [
     image_b64("cdc_hero_facility_parking.png"),
     image_b64("cdc_hero_facility_exterior.png"),
@@ -80,7 +84,7 @@ FRED_API_KEY = get_secret("FRED_API_KEY", "")
 TIMELESS_URL = "https://www.timelessdesignsflooring.com/"
 KCC_ESG_EN = "https://www.kccglass.co.kr/eng/esgManagement/about/report.do"
 KCC_ESG_KO = "https://www.kccglass.co.kr/esgManagement/about/report.do"
-MENU_ITEMS = ["Account Overview", "Order & Shipment Desk", "Permagrain SKU Room", "Market Signal for CDC", "Next 30 Days", "ESG & Growth Kit"]
+MENU_ITEMS = ["Account Overview", "Order & Shipment Desk", "Permagrain SKU Room", "Sales Playbook", "Market Signal for CDC", "Next 30 Days", "ESG & Growth Kit"]
 
 if "view" not in st.session_state:
     st.session_state.view = MENU_ITEMS[0]
@@ -283,6 +287,13 @@ st.markdown(
 .dark-data-table tbody td {{ background:#120D0F; color:#DDE5F0; padding:9px 11px; border-top:1px solid rgba(255,255,255,.06); vertical-align:top; }}
 .dark-data-table tbody tr:nth-child(even) td {{ background:#171012; }}
 .dark-data-table tbody tr:hover td {{ background:#211418; }}
+.playbook-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }}
+.play-card {{ background:linear-gradient(180deg,#171012,#100B0D); border:1px solid {LINE}; border-radius:8px; padding:13px; min-height:168px; }}
+.play-k {{ color:{GOLD}; font-size:calc(10px * var(--ui-scale)); font-weight:900; text-transform:uppercase; }}
+.play-v {{ color:{INK}; font-size:calc(17px * var(--ui-scale)); font-weight:900; line-height:1.22; margin-top:7px; }}
+.play-d {{ color:#A8B2C0; font-size:calc(12px * var(--ui-scale)); line-height:1.45; margin-top:8px; }}
+.script-box {{ background:#0D1117; border:1px solid rgba(239,0,31,.28); border-left:4px solid {CDC_RED}; border-radius:8px; padding:13px; color:#F4F7FB; font-size:calc(15px * var(--ui-scale)); line-height:1.55; }}
+.asset-img {{ width:100%; border-radius:8px; border:1px solid {LINE}; background:#FFFFFF; }}
 @media (max-width: 1400px) {{
   .top-meta {{ display:none; }}
   .platform-title {{ font-size:16px; }}
@@ -290,7 +301,7 @@ st.markdown(
 }}
 @media (max-width: 860px) {{
   .care-grid {{ grid-template-columns:1fr; }}
-  .grid4, .grid6, .sku-grid, .timeline {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
+  .grid4, .grid6, .sku-grid, .timeline, .playbook-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:100%; }}
   .kcc-lockup {{ display:none; }}
   .hero-main {{ min-height:1140px; }}
@@ -298,7 +309,7 @@ st.markdown(
   .h1 {{ font-size:34px; }}
 }}
 @media (max-width: 700px) {{
-  .grid4, .grid6, .sku-grid, .timeline {{ grid-template-columns:1fr; }}
+  .grid4, .grid6, .sku-grid, .timeline, .playbook-grid {{ grid-template-columns:1fr; }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .topbar {{ min-height:58px; padding:9px 12px; }}
   .top-meta {{ display:none; }}
@@ -525,6 +536,107 @@ def sku_rows() -> list[dict[str, str]]:
     ]
 
 
+def sales_pitch_cards() -> list[dict[str, str]]:
+    return [
+        {
+            "k": "30-second pitch",
+            "v": "A managed LVT program with comfort, safety, design depth, and project-ready documentation.",
+            "d": "Use this when opening a dealer, builder, property manager, or commercial conversation.",
+        },
+        {
+            "k": "Proof point",
+            "v": "ASTM / EN test reports show PASS across dimensional stability, wear, flexibility, slip, heat, stain, and chemical resistance.",
+            "d": "Do not lead with test numbers. Use them after the customer raises a concern.",
+        },
+        {
+            "k": "Close line",
+            "v": "Permagrain gives CDC a practical launch line backed by KCC Glass manufacturing discipline.",
+            "d": "Position it as a managed program, not only another LVT SKU list.",
+        },
+    ]
+
+
+def objection_rows() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            [
+                "Dent / curl / deformation concern",
+                "The structure is designed for dimensional stability with annealing control and glass fiber reinforcement.",
+                "ASTM F2199 dimensional stability and curl PASS; EN ISO 23999 PASS.",
+                "Use for builders, multifamily jobs, and customers worried about temperature or humidity movement.",
+            ],
+            [
+                "Slip concern",
+                "The surface is designed to reduce slip risk in active commercial and residential spaces.",
+                "DIN 51130 R11 rating; EN slip resistance R9-R11 PASS; ASTM slip tests PASS.",
+                "Use for healthcare, senior living, education, multifamily common areas, and retail showrooms.",
+            ],
+            [
+                "Noise / floor impact concern",
+                "The optional Acoustic Layer helps absorb impact sound and improve step comfort.",
+                "ISO 717-2 sound insulation test: 13dB for SENSELAY 5.0T Acoustic Layer.",
+                "Use for apartment, condo, hospitality, office, and upper-floor renovation conversations.",
+            ],
+            [
+                "Indoor air / documentation concern",
+                "The program is supported by recognized product and system certifications for specification packages.",
+                "FloorScore, GREENGUARD Gold, CE, HPD v2.3, Carbon Footprint, ISO 9001, ISO 14001.",
+                "Use for architects, designers, commercial bids, public projects, and documentation-driven accounts.",
+            ],
+            [
+                "Design sameness concern",
+                "Digital printing supports sharper visual clarity, natural shading, lower MOQ, and broader customization.",
+                "Digital printing enables wider color spectrum and reduced pattern repetition versus traditional gravure.",
+                "Use when a dealer wants a more differentiated story than basic oak colorways.",
+            ],
+            [
+                "Large project reliability concern",
+                "KCC Glass is not a small one-line supplier; it brings scale, design assets, and system-backed production.",
+                "Brochure profile: 6,000,000 m2 capacity, 2,045 employees, design assets, and in-house systems.",
+                "Use when CDC needs confidence for program expansion or larger project commitments.",
+            ],
+        ],
+        columns=["Customer Objection", "How CDC Should Answer", "Proof To Use", "Best Sales Moment"],
+    )
+
+
+def certification_rows() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            ["FloorScore", "Product certification", "Indoor air quality confidence for flooring specifications."],
+            ["GREENGUARD Gold", "Product certification", "Use with schools, healthcare, multifamily, and indoor-air-sensitive projects."],
+            ["CE", "Product certification", "Supports international compliance language in project documentation."],
+            ["HPD v2.3", "Product certification", "Use when architects or specifiers ask for material transparency."],
+            ["Carbon Footprint", "Product certification", "Supports lower-carbon and responsible sourcing conversations."],
+            ["ISO 9001", "System certification", "Quality management system credibility."],
+            ["ISO 14001", "System certification", "Environmental management system credibility."],
+            ["EcoVadis Platinum", "ESG rating", "Use for corporate, public, and large-project sustainability screening."],
+        ],
+        columns=["Badge", "Category", "How CDC Can Use It"],
+    )
+
+
+def four_re_rows() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            ["Recycle", "Materials prepared from plasticizers extracted from discarded PET bottles."],
+            ["Reuse", "Method developed to reuse discarded plasticizers generated during sheet vinyl manufacturing."],
+            ["Replacement", "Bio-mass material from corn stalks used as an alternative material for UV coating."],
+            ["Reduce", "Development work to reduce petroleum-based chemical raw materials."],
+        ],
+        columns=["4Re Theme", "Bid / Project Message"],
+    )
+
+
+def local_file_bytes(file_name: str) -> bytes:
+    path = os.path.join(APP_DIR, file_name)
+    try:
+        with open(path, "rb") as handle:
+            return handle.read()
+    except Exception:
+        return b""
+
+
 def style_currency(frame: pd.DataFrame, columns: list[str]) -> pd.io.formats.style.Styler:
     return frame.style.format({column: "${:,.0f}" for column in columns})
 
@@ -698,6 +810,25 @@ def market_summary_row(
 def render_table(frame: pd.DataFrame) -> None:
     html = frame.to_html(index=False, escape=False, classes="dark-data-table", border=0)
     st.markdown(f'<div class="dark-table-scroll">{html}</div>', unsafe_allow_html=True)
+
+
+def render_play_cards(cards: list[dict[str, str]]) -> None:
+    html = '<div class="playbook-grid">'
+    for card in cards:
+        html += f"""
+<div class="play-card">
+  <div class="play-k">{card['k']}</div>
+  <div class="play-v">{card['v']}</div>
+  <div class="play-d">{card['d']}</div>
+</div>
+"""
+    html += "</div>"
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def render_asset_image(image: str, alt: str) -> None:
+    if image:
+        st.markdown(f'<img class="asset-img" src="data:image/png;base64,{image}" alt="{alt}">', unsafe_allow_html=True)
 
 
 def create_customer_brief_pdf() -> bytes:
@@ -1159,6 +1290,137 @@ elif view == "Permagrain SKU Room":
         columns=["Use Case", "Hero SKUs", "How CDC Can Use It"],
     )
     render_table(notes)
+    close_panel()
+
+elif view == "Sales Playbook":
+    panel("CDC Sales Playbook", "how to sell Permagrain")
+    st.markdown(
+        """
+<div class="script-box">
+  <b>Say this first:</b> Permagrain is a CDC-ready LVT launch program backed by KCC Glass manufacturing discipline:
+  stable construction, safety documentation, acoustic comfort options, design depth, and ESG-ready project support.
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    render_play_cards(sales_pitch_cards())
+    close_panel()
+
+    panel("Objection-Handling Cards", "customer concern -> proof -> sales moment")
+    st.markdown(
+        """
+<div class="brief">
+  Use this table as a quick coaching sheet for CDC sales reps. The point is not to list test reports;
+  the point is to connect each report to the customer concern it answers.
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    objection_table = objection_rows()
+    render_table(objection_table)
+    st.download_button(
+        "Download objection-handling sheet",
+        objection_table.to_csv(index=False).encode("utf-8-sig"),
+        "CDC_Permagrain_Objection_Handling.csv",
+        "text/csv",
+        width="stretch",
+    )
+    close_panel()
+
+    c1, c2 = st.columns([1.05, 0.95])
+    with c1:
+        panel("Certification Badge Library", "proposal-ready proof points")
+        render_asset_image(KCC_CERT_BADGES, "KCC Glass certification badges")
+        badge_table = certification_rows()
+        render_table(badge_table)
+        cert_bytes = local_file_bytes("kcc_certification_badges.png")
+        if cert_bytes:
+            st.download_button(
+                "Download certification badge strip",
+                cert_bytes,
+                "KCC_Glass_Certification_Badges.png",
+                "image/png",
+                width="stretch",
+            )
+        st.download_button(
+            "Download badge usage matrix",
+            badge_table.to_csv(index=False).encode("utf-8-sig"),
+            "KCC_Glass_Certification_Badge_Usage.csv",
+            "text/csv",
+            width="stretch",
+        )
+        close_panel()
+    with c2:
+        panel("30-Second Selling Points", "copy-ready scripts")
+        scripts = pd.DataFrame(
+            [
+                ["Builder / multifamily", "Lead with dimensional stability, acoustic comfort, and practical low-risk visuals."],
+                ["Retail dealer", "Lead with durable visuals, clear certification proof, and a managed launch program."],
+                ["Commercial / public bid", "Lead with FloorScore, GREENGUARD Gold, HPD, ISO systems, and ESG/4Re support."],
+                ["Design-driven account", "Lead with digital printing, broader color expression, lower MOQ, and design assets."],
+            ],
+            columns=["Audience", "Tell Them This"],
+        )
+        render_table(scripts)
+        st.markdown(
+            """
+<div class="meaning"><b>Customer line:</b> This is not only a color launch. It is a documented LVT program CDC can sell into residential, commercial, and specification-driven accounts.</div>
+""",
+            unsafe_allow_html=True,
+        )
+        close_panel()
+
+    c3, c4 = st.columns([1, 1])
+    with c3:
+        panel("ESG / 4Re Section", "large project and bid support")
+        render_asset_image(KCC_4RE_IMAGE, "KCC Glass 4Re eco friendly solutions")
+        render_table(four_re_rows())
+        esg_img = local_file_bytes("kcc_4re_solution.png")
+        if esg_img:
+            st.download_button(
+                "Download 4Re visual",
+                esg_img,
+                "KCC_Glass_4Re_Solution.png",
+                "image/png",
+                width="stretch",
+            )
+        close_panel()
+    with c4:
+        panel("Acoustic Layer Proof", "noise mitigation talking point")
+        render_asset_image(KCC_ACOUSTIC_IMAGE, "KCC Glass acoustic layer 13dB proof")
+        acoustic_rows = pd.DataFrame(
+            [
+                ["Customer Concern", "Noise transfer, step comfort, upper-floor renovation risk."],
+                ["Sales Answer", "The optional Acoustic Layer helps absorb impact sound and improve everyday comfort."],
+                ["Proof", "ISO 717-2 sound insulation test: 13dB for SENSELAY 5.0T Acoustic Layer."],
+                ["Best Use", "Multifamily, condo, hospitality, office, and renovation projects."],
+            ],
+            columns=["Area", "Message"],
+        )
+        render_table(acoustic_rows)
+        acoustic_img = local_file_bytes("kcc_acoustic_layer_13db.png")
+        if acoustic_img:
+            st.download_button(
+                "Download acoustic proof visual",
+                acoustic_img,
+                "KCC_Glass_Acoustic_Layer_13dB.png",
+                "image/png",
+                width="stretch",
+            )
+        close_panel()
+
+    panel("Source Material", "brochure download")
+    brochure_bytes = local_file_bytes(KCC_BROCHURE_FILE)
+    if brochure_bytes:
+        st.download_button(
+            "Download KCC Glass LVT brochure",
+            brochure_bytes,
+            "KCC_Glass_LVT_Blue_Brochure_2026.pdf",
+            "application/pdf",
+            width="stretch",
+        )
+    else:
+        st.info("Brochure file is not available in this deployment package yet.")
     close_panel()
 
 elif view == "Market Signal for CDC":
