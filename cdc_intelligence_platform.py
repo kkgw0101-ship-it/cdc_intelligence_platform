@@ -85,10 +85,11 @@ MENU_ITEMS = ["Account Overview", "Order & Shipment Desk", "Permagrain SKU Room"
 if "view" not in st.session_state:
     st.session_state.view = MENU_ITEMS[0]
 
-if "text_size_mode" not in st.session_state:
-    st.session_state.text_size_mode = "기본"
+TEXT_SIZE_OPTIONS = ["Default", "Large", "Extra Large"]
+if "text_size_mode" not in st.session_state or st.session_state.text_size_mode not in TEXT_SIZE_OPTIONS:
+    st.session_state.text_size_mode = "Default"
 
-TEXT_SCALE = {"기본": 1.0, "크게": 1.08, "더 크게": 1.16}.get(st.session_state.text_size_mode, 1.0)
+TEXT_SCALE = {"Default": 1.0, "Large": 1.08, "Extra Large": 1.16}.get(st.session_state.text_size_mode, 1.0)
 
 st.markdown(
     f"""
@@ -206,9 +207,6 @@ st.markdown(
 .hero-brand-text {{ display:flex; flex-direction:column; gap:2px; }}
 .hero-brand-main {{ color:#fff; font-size:15px; font-weight:900; text-transform:uppercase; letter-spacing:.8px; }}
 .hero-brand-sub {{ color:#AFB8C7; font-size:10px; font-weight:900; text-transform:uppercase; }}
-.hero-kcc-chip {{ display:flex; align-items:center; gap:10px; background:rgba(14,35,114,.72); border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:12px 14px; }}
-.hero-kcc-chip img {{ height:34px; width:auto; }}
-.hero-kcc-chip span {{ color:#E4E8F5; font-size:10px; font-weight:900; text-transform:uppercase; }}
 .eyebrow {{ color:{GOLD}; font-size:calc(13px * var(--ui-scale)); text-transform:uppercase; font-weight:900; letter-spacing:3px; }}
 .h1 {{ color:#fff; font-size:calc(52px * var(--ui-scale)); line-height:1.04; font-weight:900; max-width:860px; margin-top:18px; }}
 .h-sub {{ color:#DDE7F0; font-size:calc(16px * var(--ui-scale)); line-height:1.6; max-width:760px; margin-top:18px; }}
@@ -561,6 +559,92 @@ def line_chart(frame: pd.DataFrame, y_cols: list[str], title: str, height: int =
     return fig
 
 
+def housing_mortgage_chart(housing_frame: pd.DataFrame, mortgage_frame: pd.DataFrame) -> go.Figure:
+    fig = go.Figure()
+    if not housing_frame.empty:
+        fig.add_trace(
+            go.Bar(
+                x=housing_frame.tail(48)["date"],
+                y=housing_frame.tail(48)["Housing Starts"],
+                name="Housing Starts (K)",
+                marker=dict(color="rgba(66,133,244,.72)"),
+                hovertemplate="%{x|%Y-%m-%d}<br>%{y:,.0f}K<extra></extra>",
+                yaxis="y",
+            )
+        )
+    if not mortgage_frame.empty:
+        fig.add_trace(
+            go.Scatter(
+                x=mortgage_frame.tail(160)["date"],
+                y=mortgage_frame.tail(160)["30Y Mortgage"],
+                mode="lines",
+                name="30Y Mortgage (%)",
+                line=dict(color="#FF4D4F", width=2.6),
+                hovertemplate="%{x|%Y-%m-%d}<br>%{y:.2f}%<extra></extra>",
+                yaxis="y2",
+            )
+        )
+    fig.update_layout(
+        height=330,
+        margin=dict(l=12, r=12, t=34, b=16),
+        title=dict(text="US Housing & Mortgage Signal", font=dict(size=13, color=INK)),
+        paper_bgcolor=PANEL,
+        plot_bgcolor=PANEL,
+        font=dict(color="#DDE5F0"),
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=11, color="#DDE5F0")),
+        xaxis=dict(showgrid=False, zeroline=False, tickfont=dict(color="#9AA4B4")),
+        yaxis=dict(title="", showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4")),
+        yaxis2=dict(title="", overlaying="y", side="right", showgrid=False, zeroline=False, tickfont=dict(color="#9AA4B4")),
+    )
+    return fig
+
+
+def format_market_value(value: float, decimals: int = 0, suffix: str = "") -> str:
+    if pd.isna(value):
+        return "-"
+    number = f"{value:,.{decimals}f}"
+    return f"{number}{suffix}"
+
+
+def pct_change(current: float, prior: float) -> str:
+    if pd.isna(current) or pd.isna(prior) or prior == 0:
+        return "-"
+    change = (current - prior) / prior * 100
+    color = "#4ADE80" if change >= 0 else "#FF6B6E"
+    return f'<span style="color:{color};font-weight:900;">{change:+.1f}%</span>'
+
+
+def market_summary_row(
+    frame: pd.DataFrame,
+    label: str,
+    column: str,
+    unit: str,
+    decimals: int = 0,
+    previous_periods: int = 1,
+    year_periods: int = 12,
+) -> list[str]:
+    if frame.empty or column not in frame:
+        return [label, unit, "-", "-", "-", "-", "-", "-"]
+    clean = frame[["date", column]].dropna().copy()
+    if clean.empty:
+        return [label, unit, "-", "-", "-", "-", "-", "-"]
+    current = float(clean[column].iloc[-1])
+    previous = float(clean[column].iloc[-1 - previous_periods]) if len(clean) > previous_periods else float("nan")
+    year_ago = float(clean[column].iloc[-1 - year_periods]) if len(clean) > year_periods else float("nan")
+    latest_date = clean["date"].iloc[-1].strftime("%Y-%m-%d")
+    return [
+        label,
+        unit,
+        latest_date,
+        format_market_value(current, decimals),
+        format_market_value(previous, decimals),
+        pct_change(current, previous),
+        format_market_value(year_ago, decimals),
+        pct_change(current, year_ago),
+    ]
+
+
 def render_table(frame: pd.DataFrame) -> None:
     html = frame.to_html(index=False, escape=False, classes="dark-data-table", border=0)
     st.markdown(f'<div class="dark-table-scroll">{html}</div>', unsafe_allow_html=True)
@@ -697,7 +781,7 @@ with st.sidebar:
         st.markdown('<div class="side-tool-label">Text Size</div>', unsafe_allow_html=True)
         st.radio(
             "Text Size",
-            ["기본", "크게", "더 크게"],
+            TEXT_SIZE_OPTIONS,
             key="text_size_mode",
             label_visibility="collapsed",
         )
@@ -819,7 +903,6 @@ def render_hero() -> None:
               <div class="hero-brand-sub">Private account workspace</div>
             </div>
           </div>
-          <div class="hero-kcc-chip"><span>Strategic manufacturing partner</span>{kcc_partner}</div>
         </div>
         <div class="eyebrow">KCC Glass Managed Account Command Center</div>
         <div class="h1">CDC Permagrain Intelligence Platform</div>
@@ -831,7 +914,7 @@ def render_hero() -> None:
       <div class="hero-bottom">
         <div class="hero-actions">
           <span class="pill">CDC order desk</span>
-          <span class="pill">KCC Glass support</span>
+          <span class="pill">Managed account support</span>
           <span class="pill">Permagrain SKU room</span>
           <span class="pill">FRED + freight + PVC signals</span>
         </div>
@@ -1057,40 +1140,62 @@ elif view == "Market Signal for CDC":
     )
     close_panel()
 
+    panel("US Housing & Mortgage Rate", "starts vs 30Y mortgage")
+    if not housing.empty or not mortgage.empty:
+        st.plotly_chart(housing_mortgage_chart(housing, mortgage), width="stretch", config={"displayModeBar": False})
+        housing_summary = pd.DataFrame(
+            [
+                market_summary_row(housing, "Housing Starts", "Housing Starts", "K", 0, 1, 12),
+                market_summary_row(new_home_sales, "New Home Sales", "New Home Sales", "K", 0, 1, 12),
+                market_summary_row(mortgage, "30Y Mortgage", "30Y Mortgage", "%", 2, 4, 52),
+            ],
+            columns=["Indicator", "Unit", "Latest", "Current", "Prior", "Prior Change", "Year Ago", "YoY"],
+        )
+        render_table(housing_summary)
+    else:
+        st.info("FRED chart waiting for API key.")
+    close_panel()
+
     c1, c2 = st.columns(2)
     with c1:
-        panel("U.S. Housing Demand", "FRED: HOUST / HSN1F")
-        if not housing.empty:
-            fig = line_chart(housing.tail(36), ["Housing Starts"], "Housing Starts")
-            st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
-        else:
-            st.info("FRED chart waiting for API key.")
-        if not new_home_sales.empty:
-            fig = line_chart(new_home_sales.tail(36), ["New Home Sales"], "New Home Sales")
-            st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+        panel("Freight Index Watch", "SCFI / CCFI")
+        if not freight.empty:
+            st.plotly_chart(line_chart(freight.tail(80), ["SCFI", "CCFI"], "Container Freight Indices", height=310), width="stretch", config={"displayModeBar": False})
+            freight_summary = pd.DataFrame(
+                [
+                    market_summary_row(freight, "SCFI", "SCFI", "Index", 0, 4, 52),
+                    market_summary_row(freight, "CCFI", "CCFI", "Index", 0, 4, 52),
+                ],
+                columns=["Indicator", "Unit", "Latest", "Current", "4W Prior", "4W Change", "Year Ago", "YoY"],
+            )
+            render_table(freight_summary)
         close_panel()
     with c2:
-        panel("Rates & Retail Pulse", "FRED: MORTGAGE30US / MRTSSM4441USN")
-        if not mortgage.empty:
-            st.plotly_chart(line_chart(mortgage.tail(80), ["30Y Mortgage"], "30Y Mortgage Rate"), width="stretch", config={"displayModeBar": False})
-        else:
-            st.info("FRED chart waiting for API key.")
-        if not building_retail.empty:
-            st.plotly_chart(line_chart(building_retail.tail(36), ["Building Materials Retail"], "Building Materials & Garden Retail Sales"), width="stretch", config={"displayModeBar": False})
+        panel("PVC / DOTP Cost Watch", "purchase reference")
+        st.plotly_chart(line_chart(purchase, ["PVC", "DOTP"], "PVC / DOTP Purchase Index", height=310), width="stretch", config={"displayModeBar": False})
+        raw_material_summary = pd.DataFrame(
+            [
+                market_summary_row(purchase, "PVC", "PVC", "Index", 1, 1, 12),
+                market_summary_row(purchase, "DOTP", "DOTP", "Index", 1, 1, 12),
+            ],
+            columns=["Indicator", "Unit", "Latest", "Current", "Prior", "Prior Change", "Year Ago", "YoY"],
+        )
+        render_table(raw_material_summary)
         close_panel()
 
-    c3, c4 = st.columns(2)
-    with c3:
-        panel("SCFI / CCFI Freight Index", "local weekly records")
-        if not freight.empty:
-            st.plotly_chart(line_chart(freight.tail(80), ["SCFI", "CCFI"], "Container Freight Indices"), width="stretch", config={"displayModeBar": False})
-            st.caption(f"Latest SCFI {scfi_now:,.0f}, 4-week change {scfi_delta:+.1f}%.")
-        close_panel()
-    with c4:
-        panel("PVC / DOTP Cost Index", "purchase reference")
-        st.plotly_chart(line_chart(purchase, ["PVC", "DOTP"], "PVC / DOTP Purchase Index"), width="stretch", config={"displayModeBar": False})
-        st.caption(f"Latest PVC {pvc_now:,.1f}, month-over-month change {pvc_delta:+.1f}%.")
-        close_panel()
+    panel("Retail Demand Pulse", "FRED: building materials retail")
+    if not building_retail.empty:
+        st.plotly_chart(line_chart(building_retail.tail(48), ["Building Materials Retail"], "Building Materials & Garden Retail Sales", height=300), width="stretch", config={"displayModeBar": False})
+        retail_summary = pd.DataFrame(
+            [
+                market_summary_row(building_retail, "Building Materials Retail", "Building Materials Retail", "USD MM", 0, 1, 12),
+            ],
+            columns=["Indicator", "Unit", "Latest", "Current", "Prior", "Prior Change", "Year Ago", "YoY"],
+        )
+        render_table(retail_summary)
+    else:
+        st.info("FRED chart waiting for API key.")
+    close_panel()
 
 elif view == "Next 30 Days":
     panel("Next 30 Days", "visible care rhythm")
