@@ -313,6 +313,12 @@ def pct_delta(series: pd.Series, periods: int = 1) -> float:
     return (clean.iloc[-1] - clean.iloc[-1 - periods]) / clean.iloc[-1 - periods] * 100
 
 
+def amount_column(frame: pd.DataFrame, column: str) -> pd.Series:
+    source = frame.get(column, pd.Series(0, index=frame.index))
+    cleaned = source.astype(str).str.replace("$", "", regex=False).str.replace(",", "", regex=False)
+    return pd.to_numeric(cleaned, errors="coerce").fillna(0)
+
+
 @st.cache_data(ttl=3600)
 def get_fred(series_id: str, label: str) -> pd.DataFrame:
     if not FRED_API_KEY:
@@ -377,33 +383,37 @@ def purchase_index() -> pd.DataFrame:
 def default_orders() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            ["CDC-PO-2504-01", "Permagrain Launch Set", "2026-04-18", "40HC x 2", "Delivered", "Completed"],
-            ["CDC-PO-2505-02", "PG-101 / PG-203 / PG-304", "2026-05-23", "40HC x 3", "On Water", "Next ETA update due"],
-            ["CDC-PO-2506-01", "PG-405 / PG-506", "2026-06-12", "40HC x 1", "Production", "Weekly production follow-up"],
-            ["CDC-FC-2507", "Forecast replenishment", "2026-07-20", "40HC x 4", "Forecast", "CDC confirmation pending"],
+            ["1st", "Permagrain launch shipment", "04/04", "05/15-05/19", "12 CNTR", "Delivered", "Paid"],
+            ["2nd", "Permagrain launch shipment", "04/25", "05/30", "6 CNTR", "Delivered", "Paid"],
+            ["3rd", "Permagrain + handboard shipment", "05/20", "07/01", "7 CNTR", "Delivered", "Due on arrival (7d)"],
         ],
-        columns=["PO", "Program", "Order Date", "Volume", "Status", "Next Action"],
+        columns=["Round", "Program", "ETD", "ETA", "Volume", "Status", "Payment"],
     )
 
 
 def default_shipments() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            ["KRPUS-2505-17", "Busan", "Savannah", "2026-06-04", "2026-07-09", "On water", "Docs ready"],
-            ["KRPUS-2506-03", "Busan", "Houston", "2026-06-28", "2026-08-01", "Booking", "Space secured"],
-            ["KRPUS-2506-11", "Busan", "Savannah", "2026-07-12", "2026-08-16", "Planned", "Awaiting final PO"],
+            ["1st", "JSBCV2603755", 4, "04/04", "05/15", "Cincinnati", "Delivered", "$119,700.00", "Paid", ""],
+            ["1st", "JSBCV2603756", 4, "04/04", "05/19", "Cincinnati", "Delivered", "$119,700.00", "Paid", ""],
+            ["1st", "JSBCV2603757", 4, "04/04", "05/15", "Cincinnati", "Delivered", "$119,700.00", "Paid", ""],
+            ["2nd", "JSBDE2604764", 3, "04/25", "05/30", "Michigan", "Delivered", "$89,775.00", "Paid", ""],
+            ["2nd", "JSBDE2604765", 3, "04/25", "05/30", "Michigan", "Delivered", "$89,775.00", "Paid", ""],
+            ["3rd", "JSBCV2605758", 3, "05/20", "07/01", "Cincinnati", "Delivered", "$89,775.00", "Due on arrival (7d)", ""],
+            ["3rd", "JSBCV2605759", 3, "05/20", "07/01", "Cincinnati", "Delivered", "$89,775.00", "Due on arrival (7d)", ""],
+            ["3rd", "JSBCV2605760", 1, "05/20", "07/01", "Cincinnati", "Delivered", "$15,200.00", "Due on arrival (7d)", "Handboard (1,002 pcs)"],
         ],
-        columns=["Shipment", "POL", "POD", "ETD", "ETA", "Stage", "Service Note"],
+        columns=["Round", "B/L No.", "Containers", "ETD", "ETA", "Destination", "Status", "Amount", "Payment", "Remarks"],
     )
 
 
 def default_credit() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            ["Account Status", "On Track", "Program is active and service rhythm is in place"],
-            ["Open Program Capacity", "Available", "Capacity view can be finalized before external sharing"],
-            ["Documentation", "Ready", "Shipment and ESG support materials can be shared as needed"],
-            ["Next Review", "Monthly", "Recommended cadence for launch-stage account care"],
+            ["Shipment Status", "25 CNTR Delivered", "24 product containers + 1 handboard container"],
+            ["Payment Status", "1st / 2nd Paid", "$538,650.00 paid for the first two shipment groups"],
+            ["Arrival Payment", "3rd Due on Arrival (7d)", "$194,750.00 tied to the July 1 arrival shipment"],
+            ["Sample Support", "Handboard Included", "1 container / 1,002 pcs handboard shipment included in the 3rd group"],
         ],
         columns=["Area", "Status", "Program Note"],
     )
@@ -412,14 +422,16 @@ def default_credit() -> pd.DataFrame:
 def default_order_shipment_desk() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            ["CDC-PO-2505-02", "PG-101", "Natural Reserve Oak", "Planning Qty", "On Water", "2026-06-04 / 2026-07-09", "Forwarder TBC", "No critical issue", "2026-07-01"],
-            ["CDC-PO-2505-02", "PG-203", "Coastal Sand Oak", "Planning Qty", "On Water", "2026-06-04 / 2026-07-09", "Forwarder TBC", "Docs follow-up", "2026-07-01"],
-            ["CDC-PO-2505-02", "PG-304", "Urban Greige Oak", "Planning Qty", "On Water", "2026-06-04 / 2026-07-09", "Forwarder TBC", "No critical issue", "2026-07-01"],
-            ["CDC-PO-2506-01", "PG-405", "Smoked Valley Oak", "Planning Qty", "Production", "2026-06-28 / 2026-08-01", "Forwarder TBC", "Production status check", "2026-07-03"],
-            ["CDC-PO-2506-01", "PG-506", "Heritage Brown Oak", "Planning Qty", "Production", "2026-06-28 / 2026-08-01", "Forwarder TBC", "Production status check", "2026-07-03"],
-            ["CDC-FC-2507", "PG-607", "Nordic Linen Oak", "Forecast Qty", "Forecast", "TBC", "TBC", "Launch decision pending", "2026-07-10"],
+            ["1st", "JSBCV2603755", 4, "04/04", "05/15", "Cincinnati", "Delivered", "$119,700.00", "Paid", ""],
+            ["1st", "JSBCV2603756", 4, "04/04", "05/19", "Cincinnati", "Delivered", "$119,700.00", "Paid", ""],
+            ["1st", "JSBCV2603757", 4, "04/04", "05/15", "Cincinnati", "Delivered", "$119,700.00", "Paid", ""],
+            ["2nd", "JSBDE2604764", 3, "04/25", "05/30", "Michigan", "Delivered", "$89,775.00", "Paid", ""],
+            ["2nd", "JSBDE2604765", 3, "04/25", "05/30", "Michigan", "Delivered", "$89,775.00", "Paid", ""],
+            ["3rd", "JSBCV2605758", 3, "05/20", "07/01", "Cincinnati", "Delivered", "$89,775.00", "Due on arrival (7d)", ""],
+            ["3rd", "JSBCV2605759", 3, "05/20", "07/01", "Cincinnati", "Delivered", "$89,775.00", "Due on arrival (7d)", ""],
+            ["3rd", "JSBCV2605760", 1, "05/20", "07/01", "Cincinnati", "Delivered", "$15,200.00", "Due on arrival (7d)", "Handboard (1,002 pcs)"],
         ],
-        columns=["PO", "SKU", "Color", "Quantity", "Production Status", "ETD / ETA", "Forwarder", "Current Issue", "Next Update Date"],
+        columns=["Round", "B/L No.", "Containers", "ETD", "ETA", "Destination", "Status", "Amount", "Payment", "Remarks"],
     )
 
 
@@ -440,7 +452,7 @@ def sku_readiness_rows() -> pd.DataFrame:
 def next_30_days_rows() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            ["This week", "Shipment snapshot 공유", "CDC can see where the launch program stands without asking first."],
+            ["This week", "Shipment snapshot review", "CDC can see where the launch program stands without asking first."],
             ["Next week", "Hand board arrival follow-up", "Keep showroom and sales-sample readiness moving."],
             ["July", "SKU launch prep", "Confirm artwork, labels, sample status, and launch sequence."],
             ["August", "Replenishment discussion", "Use first launch status to discuss the next order rhythm."],
@@ -543,7 +555,7 @@ def create_customer_brief_pdf() -> bytes:
             "",
             "Customer Care Agenda",
             "- Orders: Launch orders and replenishment forecast",
-            "- Logistics: Busan to Savannah/Houston shipment visibility",
+            "- Logistics: Cincinnati / Michigan delivery and B/L visibility",
             "- Program capacity: account status and replenishment readiness",
             "- Market: Housing, freight, PVC/DOTP cost indicators",
             "- ESG: Manufacturing partner sustainability material for CDC sales use",
@@ -566,7 +578,7 @@ def create_customer_brief_pdf() -> bytes:
     care_rows = [
         ["Area", "Current Focus", "Next Action"],
         ["Orders", "Launch orders and replenishment forecast", "Confirm July/August replenishment timing"],
-        ["Logistics", "Busan to Savannah/Houston shipment visibility", "Share weekly ETA and document status"],
+        ["Logistics", "Cincinnati / Michigan delivery and B/L visibility", "Share weekly delivery and payment follow-up status"],
         ["Program Capacity", "Account status is on track", "Keep replenishment path visible for growth"],
         ["Market", "Housing, freight, PVC/DOTP cost indicators", "Use as quote timing and promotion evidence"],
         ["ESG", "Manufacturing partner sustainability materials", "Support CDC's customer-facing sales narrative"],
@@ -692,8 +704,24 @@ mortgage = get_fred("MORTGAGE30US", "30Y Mortgage")
 new_home_sales = get_fred("HSN1F", "New Home Sales")
 building_retail = get_fred("MRTSSM4441USN", "Building Materials Retail")
 
-open_order_count = int(len(orders))
-on_water = int((shipments.get("Stage", pd.Series(dtype=str)).astype(str).str.contains("water|booking", case=False, na=False)).sum())
+shipment_group_count = int(len(orders))
+shipment_containers = pd.to_numeric(shipments.get("Containers", pd.Series(0, index=shipments.index)), errors="coerce").fillna(0)
+shipment_amounts = amount_column(shipments, "Amount")
+status_text = shipments.get("Status", pd.Series("", index=shipments.index)).astype(str)
+payment_text = shipments.get("Payment", pd.Series("", index=shipments.index)).astype(str)
+remarks_text = shipments.get("Remarks", pd.Series("", index=shipments.index)).astype(str)
+delivered_mask = status_text.str.contains("delivered", case=False, na=False)
+paid_mask = payment_text.str.fullmatch("Paid", case=False, na=False)
+due_mask = payment_text.str.contains("due", case=False, na=False)
+handboard_mask = remarks_text.str.contains("handboard", case=False, na=False)
+shipment_container_total = int(shipment_containers.sum())
+delivered_container_count = int(shipment_containers[delivered_mask].sum())
+paid_container_count = int(shipment_containers[paid_mask].sum())
+due_container_count = int(shipment_containers[due_mask].sum())
+handboard_container_count = int(shipment_containers[handboard_mask].sum())
+product_container_count = max(shipment_container_total - handboard_container_count, 0)
+paid_amount = float(shipment_amounts[paid_mask].sum())
+due_amount = float(shipment_amounts[due_mask].sum())
 confirmed_skus = int((sku_readiness["Status"] == "Confirmed").sum())
 pending_skus = int((sku_readiness["Status"] == "Pending").sum())
 program_capacity = "Available"
@@ -774,9 +802,9 @@ def render_hero() -> None:
         </div>
         <div class="hero-signal-grid">
           <div class="signal alert"><div class="signal-k">Account Health</div><div class="signal-v">GREEN</div><div class="signal-d">Launch account under active management</div></div>
-          <div class="signal"><div class="signal-k">Open Orders</div><div class="signal-v">{open_order_count}</div><div class="signal-d">Active order and forecast lines</div></div>
-          <div class="signal warn"><div class="signal-k">SCFI Freight Signal</div><div class="signal-v">{scfi_now:,.0f}</div><div class="signal-d">4W {scfi_delta:+.1f}% from local SCFI records</div></div>
-          <div class="signal"><div class="signal-k">PVC Index</div><div class="signal-v">{pvc_now:,.1f}</div><div class="signal-d">MoM {pvc_delta:+.1f}% purchase index</div></div>
+          <div class="signal"><div class="signal-k">Shipment Program</div><div class="signal-v">{shipment_container_total} CNTR</div><div class="signal-d">{product_container_count} product + {handboard_container_count} handboard</div></div>
+          <div class="signal"><div class="signal-k">Delivery Status</div><div class="signal-v">{delivered_container_count} Delivered</div><div class="signal-d">Cincinnati + Michigan delivery lanes</div></div>
+          <div class="signal warn"><div class="signal-k">Payment Follow-Up</div><div class="signal-v">{money(due_amount)}</div><div class="signal-d">{due_container_count} CNTR due on arrival (7d)</div></div>
         </div>
       </div>
     </div>
@@ -791,10 +819,10 @@ def render_metrics() -> None:
     st.markdown(
         f"""
 <div class="grid4">
-  <div class="metric"><div class="metric-k">Open Orders</div><div class="metric-v">{open_order_count}</div><div class="metric-c">Launch + replenishment pipeline</div></div>
-  <div class="metric"><div class="metric-k">Active shipments</div><div class="metric-v">{on_water}</div><div class="metric-c">On water or booked lanes</div></div>
-  <div class="metric"><div class="metric-k">Account Status</div><div class="metric-v">On Track</div><div class="metric-c">Launch support is active</div></div>
-  <div class="metric"><div class="metric-k">Program Capacity</div><div class="metric-v">{program_capacity}</div><div class="metric-c">Available for next expansion</div></div>
+  <div class="metric"><div class="metric-k">Total Containers</div><div class="metric-v">{shipment_container_total}</div><div class="metric-c">{shipment_group_count} shipment groups delivered</div></div>
+  <div class="metric"><div class="metric-k">Product / Handboard</div><div class="metric-v">{product_container_count}+{handboard_container_count}</div><div class="metric-c">Product CNTR + handboard support</div></div>
+  <div class="metric"><div class="metric-k">Delivery Status</div><div class="metric-v">Delivered</div><div class="metric-c">{delivered_container_count} CNTR delivery confirmed</div></div>
+  <div class="metric"><div class="metric-k">Payment Follow-Up</div><div class="metric-v">{money(due_amount)}</div><div class="metric-c">{paid_container_count} CNTR paid / {due_container_count} CNTR due</div></div>
 </div>
 """,
         unsafe_allow_html=True,
@@ -806,10 +834,10 @@ def render_overview_metrics() -> None:
         f"""
 <div class="grid6">
   <div class="metric"><div class="metric-k">Account Health</div><div class="metric-v">Green</div><div class="metric-c">Launch account under active care</div></div>
-  <div class="metric"><div class="metric-k">Open Orders</div><div class="metric-v">{open_order_count}</div><div class="metric-c">Order and forecast lines</div></div>
-  <div class="metric"><div class="metric-k">Active Shipments</div><div class="metric-v">{on_water}</div><div class="metric-c">On water or booked</div></div>
-  <div class="metric"><div class="metric-k">Account Status</div><div class="metric-v">On Track</div><div class="metric-c">Launch support is active</div></div>
-  <div class="metric"><div class="metric-k">Program Capacity</div><div class="metric-v">Available</div><div class="metric-c">Ready for next expansion</div></div>
+  <div class="metric"><div class="metric-k">Total Containers</div><div class="metric-v">{shipment_container_total}</div><div class="metric-c">{product_container_count} product + {handboard_container_count} handboard</div></div>
+  <div class="metric"><div class="metric-k">Delivered Containers</div><div class="metric-v">{delivered_container_count}</div><div class="metric-c">Cincinnati and Michigan lanes</div></div>
+  <div class="metric"><div class="metric-k">Payment Status</div><div class="metric-v">{paid_container_count} Paid</div><div class="metric-c">{due_container_count} CNTR due on arrival (7d)</div></div>
+  <div class="metric"><div class="metric-k">Payment Follow-Up</div><div class="metric-v">{money(due_amount)}</div><div class="metric-c">{money(paid_amount)} already paid</div></div>
   <div class="metric"><div class="metric-k">Launch SKUs</div><div class="metric-v">{confirmed_skus}+{pending_skus}</div><div class="metric-c">Confirmed + pending</div></div>
 </div>
 """,
@@ -819,11 +847,11 @@ def render_overview_metrics() -> None:
 
 def render_next_action() -> None:
     st.markdown(
-        """
+        f"""
 <div class="next-action">
   <div class="next-action-k">Next Action</div>
-  <div class="next-action-v">Share shipment snapshot and sample readiness status</div>
-  <div class="next-action-d">This gives CDC one clear weekly view of what is moving, what is ready, and what needs a decision.</div>
+  <div class="next-action-v">Confirm 3rd shipment payment window and handboard readiness</div>
+  <div class="next-action-d">1st and 2nd shipment groups are paid; the 3rd group was delivered on July 1 with {due_container_count} CNTR due on arrival (7d), including the 1,002 pcs handboard support.</div>
 </div>
 """,
         unsafe_allow_html=True,
@@ -867,7 +895,7 @@ if view == "Account Overview":
             """
 <div class="brief">
   <b>This is the CDC room.</b> Use this view for quick team updates and management reporting:
-  account health, open orders, active shipments, program status, next action, and the next 30-day plan.
+  account health, delivered containers, handboard support, payment follow-up, next action, and the next 30-day plan.
 </div>
 """,
             unsafe_allow_html=True,
@@ -894,12 +922,12 @@ if view == "Account Overview":
 
 elif view == "Order & Shipment Desk":
     render_metrics()
-    panel("Order & Shipment Desk", "PO / SKU / ETA / issue tracking")
+    panel("B/L-Level Shipment Desk", "B/L / ETD / ETA / payment tracking")
     st.markdown(
         """
 <div class="brief">
-  This is the most practical customer-care view for CDC and AJ: every PO line has a SKU, color,
-  production status, ETD/ETA, current issue, and next update date.
+  This is the most practical customer-care view for CDC and AJ: each B/L line shows container count,
+  destination, delivery status, payment status, and the handboard note tied to the 3rd shipment group.
 </div>
 """,
         unsafe_allow_html=True,
@@ -914,8 +942,8 @@ elif view == "Order & Shipment Desk":
     )
     close_panel()
 
-    panel("Shipment Status", "ETD / ETA / service note")
-    st.dataframe(shipments, hide_index=True, width="stretch")
+    panel("Shipment Group Summary", "1st / 2nd / 3rd")
+    st.dataframe(orders, hide_index=True, width="stretch")
     close_panel()
 
 elif view == "Permagrain SKU Room":
