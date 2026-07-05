@@ -1,6 +1,6 @@
-# CDC Permagrain Intelligence Platform
+# CDC Partner Portal
 
-Streamlit Community Cloud external sharing package for CDC Distributors / Timeless Designs / Permagrain Collection.
+Streamlit Community Cloud external sharing package for CDC Distributors / Permagrain Collection.
 
 ## Main App
 
@@ -21,17 +21,20 @@ Upload or commit these files together:
 - `cdc_distributors_logo_crop.png`
 - `cdc_logo_horizontal.png`
 - `cdc_logo_tagline_mark.png`
-- `cdc_hero_facility_aerial.png`
-- `cdc_hero_facility_parking.png`
-- `cdc_hero_facility_exterior.png`
-- `cdc_hero_team_event.png`
-- `timeless_designs_logo.png`
-- `timeless_designs_logo_crop.png`
 - `logo_white_t.png`
+- `kcc_certification_badges.png`
+- `kcc_4re_solution.png`
+- `kcc_lvt_blue_brochure_2026.pdf`
 
 ## Streamlit Secrets
 
-The app can open without secrets. To activate live FRED charts, add this in Streamlit Cloud > App settings > Secrets:
+Before sharing the public Streamlit URL, add a portal password in Streamlit Cloud > App settings > Secrets:
+
+```toml
+CDC_PORTAL_PASSWORD = "choose_a_private_password"
+```
+
+To activate live FRED charts, also add:
 
 ```toml
 FRED_API_KEY = "your_fred_api_key"
@@ -48,9 +51,10 @@ FRED_API_KEY = "your_fred_api_key"
 cdc_intelligence_platform.py
 ```
 
-5. Add `FRED_API_KEY` in Secrets if available.
-6. Deploy and copy the generated external URL.
+5. Add `CDC_PORTAL_PASSWORD` in Secrets before sharing the URL.
+6. Add `FRED_API_KEY` in Secrets if available.
+7. Deploy and copy the generated external URL.
 
 ## External Sharing Note
 
-This version is set to customer review mode. It hides upload controls and avoids internal credit, cost, margin, or preview wording.
+This version is set to customer review mode. It uses a password gate, hides upload controls, removes decorative animation, and avoids internal credit, cost, margin, or strategy-note wording.
