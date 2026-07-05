@@ -529,6 +529,46 @@ def style_currency(frame: pd.DataFrame, columns: list[str]) -> pd.io.formats.sty
     return frame.style.format({column: "${:,.0f}" for column in columns})
 
 
+PLOT_CONFIG = {
+    "displayModeBar": True,
+    "displaylogo": False,
+    "scrollZoom": True,
+    "responsive": True,
+    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+    "toImageButtonOptions": {
+        "format": "png",
+        "filename": "cdc_market_signal",
+        "height": 720,
+        "width": 1280,
+        "scale": 2,
+    },
+}
+
+
+def apply_chart_layout(fig: go.Figure, height: int) -> go.Figure:
+    fig.update_layout(
+        height=height,
+        margin=dict(l=12, r=12, t=56, b=18),
+        title=dict(text=""),
+        paper_bgcolor=PANEL,
+        plot_bgcolor=PANEL,
+        font=dict(color="#DDE5F0"),
+        colorway=["#F3D74B", "#EF001F", "#7AA7FF", "#4ADE80"],
+        hovermode="x unified",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.08,
+            x=0,
+            font=dict(size=11, color="#DDE5F0"),
+            bgcolor="rgba(20,16,17,.82)",
+        ),
+        xaxis=dict(showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4"), showspikes=True, spikemode="across", spikesnap="cursor", spikecolor="#6B7280"),
+        yaxis=dict(showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4"), showspikes=True, spikecolor="#6B7280"),
+    )
+    return fig
+
+
 def line_chart(frame: pd.DataFrame, y_cols: list[str], title: str, height: int = 250) -> go.Figure:
     fig = go.Figure()
     for col in y_cols:
@@ -543,29 +583,27 @@ def line_chart(frame: pd.DataFrame, y_cols: list[str], title: str, height: int =
                     hovertemplate="%{x|%Y-%m-%d}<br>%{y:,.2f}<extra></extra>",
                 )
             )
-    fig.update_layout(
-        height=height,
-        margin=dict(l=12, r=12, t=32, b=10),
-        title=dict(text=title, font=dict(size=13, color=INK)),
-        paper_bgcolor=PANEL,
-        plot_bgcolor=PANEL,
-        font=dict(color="#DDE5F0"),
-        colorway=["#F3D74B", "#EF001F", "#7AA7FF", "#4ADE80"],
-        hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=11, color="#DDE5F0")),
-        xaxis=dict(showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4")),
-        yaxis=dict(showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4")),
-    )
-    return fig
+    return apply_chart_layout(fig, height)
+
+
+def filter_years(frame: pd.DataFrame, years: int) -> pd.DataFrame:
+    if frame.empty or "date" not in frame:
+        return frame
+    end_date = frame["date"].max()
+    start_date = end_date - pd.DateOffset(years=years)
+    return frame[frame["date"] >= start_date].copy()
 
 
 def housing_mortgage_chart(housing_frame: pd.DataFrame, mortgage_frame: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
+    chart_start = None
     if not housing_frame.empty:
+        housing_plot = filter_years(housing_frame, 5)
+        chart_start = housing_plot["date"].min() if not housing_plot.empty else None
         fig.add_trace(
             go.Bar(
-                x=housing_frame.tail(48)["date"],
-                y=housing_frame.tail(48)["Housing Starts"],
+                x=housing_plot["date"],
+                y=housing_plot["Housing Starts"],
                 name="Housing Starts (K)",
                 marker=dict(color="rgba(66,133,244,.72)"),
                 hovertemplate="%{x|%Y-%m-%d}<br>%{y:,.0f}K<extra></extra>",
@@ -573,10 +611,15 @@ def housing_mortgage_chart(housing_frame: pd.DataFrame, mortgage_frame: pd.DataF
             )
         )
     if not mortgage_frame.empty:
+        mortgage_plot = mortgage_frame.copy()
+        if chart_start is not None:
+            mortgage_plot = mortgage_plot[mortgage_plot["date"] >= chart_start]
+        else:
+            mortgage_plot = filter_years(mortgage_plot, 5)
         fig.add_trace(
             go.Scatter(
-                x=mortgage_frame.tail(160)["date"],
-                y=mortgage_frame.tail(160)["30Y Mortgage"],
+                x=mortgage_plot["date"],
+                y=mortgage_plot["30Y Mortgage"],
                 mode="lines",
                 name="30Y Mortgage (%)",
                 line=dict(color="#FF4D4F", width=2.6),
@@ -585,17 +628,24 @@ def housing_mortgage_chart(housing_frame: pd.DataFrame, mortgage_frame: pd.DataF
             )
         )
     fig.update_layout(
-        height=330,
-        margin=dict(l=12, r=12, t=34, b=16),
-        title=dict(text="US Housing & Mortgage Signal", font=dict(size=13, color=INK)),
+        height=340,
+        margin=dict(l=12, r=12, t=56, b=18),
+        title=dict(text=""),
         paper_bgcolor=PANEL,
         plot_bgcolor=PANEL,
         font=dict(color="#DDE5F0"),
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=11, color="#DDE5F0")),
-        xaxis=dict(showgrid=False, zeroline=False, tickfont=dict(color="#9AA4B4")),
-        yaxis=dict(title="", showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4")),
-        yaxis2=dict(title="", overlaying="y", side="right", showgrid=False, zeroline=False, tickfont=dict(color="#9AA4B4")),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.08,
+            x=0,
+            font=dict(size=11, color="#DDE5F0"),
+            bgcolor="rgba(20,16,17,.82)",
+        ),
+        xaxis=dict(showgrid=False, zeroline=False, tickfont=dict(color="#9AA4B4"), showspikes=True, spikemode="across", spikesnap="cursor", spikecolor="#6B7280"),
+        yaxis=dict(title="", showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4"), showspikes=True, spikecolor="#6B7280"),
+        yaxis2=dict(title="", overlaying="y", side="right", showgrid=False, zeroline=False, tickfont=dict(color="#9AA4B4"), showspikes=True, spikecolor="#6B7280"),
     )
     return fig
 
@@ -813,6 +863,7 @@ housing = get_fred("HOUST", "Housing Starts")
 mortgage = get_fred("MORTGAGE30US", "30Y Mortgage")
 new_home_sales = get_fred("HSN1F", "New Home Sales")
 building_retail = get_fred("MRTSSM4441USN", "Building Materials Retail")
+usdkrw = get_fred("DEXKOUS", "USD/KRW")
 
 shipment_group_count = int(len(orders))
 shipment_containers = pd.to_numeric(shipments.get("Containers", pd.Series(0, index=shipments.index)), errors="coerce").fillna(0)
@@ -1140,9 +1191,32 @@ elif view == "Market Signal for CDC":
     )
     close_panel()
 
+    panel("USD/KRW Exchange Rate Trend", "FRED: DEXKOUS")
+    if not usdkrw.empty:
+        fx_window = st.radio(
+            "USD/KRW period",
+            ["1Y", "3Y", "5Y"],
+            horizontal=True,
+            label_visibility="collapsed",
+            key="usdkrw_window",
+        )
+        fx_years = {"1Y": 1, "3Y": 3, "5Y": 5}[fx_window]
+        fx_frame = filter_years(usdkrw, fx_years)
+        st.plotly_chart(line_chart(fx_frame, ["USD/KRW"], "USD/KRW Exchange Rate", height=330), width="stretch", config=PLOT_CONFIG)
+        fx_summary = pd.DataFrame(
+            [
+                market_summary_row(usdkrw, "USD/KRW", "USD/KRW", "KRW", 0, 20, 252),
+            ],
+            columns=["Indicator", "Unit", "Latest", "Current", "20D Prior", "20D Change", "1Y Prior", "YoY"],
+        )
+        render_table(fx_summary)
+    else:
+        st.info("USD/KRW chart waiting for FRED API key.")
+    close_panel()
+
     panel("US Housing & Mortgage Rate", "starts vs 30Y mortgage")
     if not housing.empty or not mortgage.empty:
-        st.plotly_chart(housing_mortgage_chart(housing, mortgage), width="stretch", config={"displayModeBar": False})
+        st.plotly_chart(housing_mortgage_chart(housing, mortgage), width="stretch", config=PLOT_CONFIG)
         housing_summary = pd.DataFrame(
             [
                 market_summary_row(housing, "Housing Starts", "Housing Starts", "K", 0, 1, 12),
@@ -1160,7 +1234,7 @@ elif view == "Market Signal for CDC":
     with c1:
         panel("Freight Index Watch", "SCFI / CCFI")
         if not freight.empty:
-            st.plotly_chart(line_chart(freight.tail(80), ["SCFI", "CCFI"], "Container Freight Indices", height=310), width="stretch", config={"displayModeBar": False})
+            st.plotly_chart(line_chart(freight.tail(80), ["SCFI", "CCFI"], "Container Freight Indices", height=310), width="stretch", config=PLOT_CONFIG)
             freight_summary = pd.DataFrame(
                 [
                     market_summary_row(freight, "SCFI", "SCFI", "Index", 0, 4, 52),
@@ -1172,7 +1246,7 @@ elif view == "Market Signal for CDC":
         close_panel()
     with c2:
         panel("PVC / DOTP Cost Watch", "purchase reference")
-        st.plotly_chart(line_chart(purchase, ["PVC", "DOTP"], "PVC / DOTP Purchase Index", height=310), width="stretch", config={"displayModeBar": False})
+        st.plotly_chart(line_chart(purchase, ["PVC", "DOTP"], "PVC / DOTP Purchase Index", height=310), width="stretch", config=PLOT_CONFIG)
         raw_material_summary = pd.DataFrame(
             [
                 market_summary_row(purchase, "PVC", "PVC", "Index", 1, 1, 12),
@@ -1185,7 +1259,7 @@ elif view == "Market Signal for CDC":
 
     panel("Retail Demand Pulse", "FRED: building materials retail")
     if not building_retail.empty:
-        st.plotly_chart(line_chart(building_retail.tail(48), ["Building Materials Retail"], "Building Materials & Garden Retail Sales", height=300), width="stretch", config={"displayModeBar": False})
+        st.plotly_chart(line_chart(building_retail.tail(48), ["Building Materials Retail"], "Building Materials & Garden Retail Sales", height=300), width="stretch", config=PLOT_CONFIG)
         retail_summary = pd.DataFrame(
             [
                 market_summary_row(building_retail, "Building Materials Retail", "Building Materials Retail", "USD MM", 0, 1, 12),
