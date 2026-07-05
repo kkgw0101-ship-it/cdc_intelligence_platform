@@ -95,6 +95,11 @@ KCC_VIDEO_THUMB = image_b64("kcc_company_video_thumb.jpg")
 KCC_CERT_BADGES = image_b64("kcc_certification_badges.png")
 KCC_4RE_IMAGE = image_b64("kcc_4re_solution.png")
 KCC_BROCHURE_FILE = "kcc_lvt_blue_brochure_2026.pdf"
+CDC_HERO_IMAGES = [
+    image_b64("cdc_hero_facility_aerial.png"),
+    image_b64("cdc_hero_team_event.png"),
+    image_b64("cdc_hero_facility_parking.png"),
+]
 FRED_API_KEY = get_secret("FRED_API_KEY", "")
 SHIPMENT_AS_OF = "2026-07-01"
 SHIPMENT_SOURCE = "KCC shipping desk"
@@ -154,11 +159,16 @@ st.markdown(
 [data-testid="stSidebar"] [role="radiogroup"] label:hover {{ background:rgba(239,0,31,.16); }}
 .sb-nav-label {{ color:#D9BFC3 !important; font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; margin:14px 0 6px 0; }}
 .sidebar-logo {{ width:96px; max-width:100%; background:#050505; border-radius:7px; padding:5px; margin-bottom:10px; border:1px solid rgba(243,215,75,.34); }}
-.data-strip {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:10px; }}
-.data-chip {{ background:#101419; border:1px solid {LINE}; border-radius:8px; padding:10px 12px; min-height:58px; }}
-.data-k {{ color:#8F9AAD; font-size:10px; text-transform:uppercase; font-weight:600; }}
-.data-v {{ color:#FFFFFF; font-size:16px; font-weight:700; margin-top:3px; font-family:Consolas, monospace; }}
-.data-d {{ color:#8893A2; font-size:11px; margin-top:2px; }}
+.data-strip {{ display:none; }}
+.market-marquee {{ height:34px; overflow:hidden; background:#0A0D11; border:1px solid {LINE}; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; box-shadow:0 10px 24px rgba(0,0,0,.16); }}
+.market-track {{ display:flex; width:max-content; animation:marketFlow 58s linear infinite; }}
+.market-set {{ display:flex; align-items:center; flex-shrink:0; min-width:max-content; }}
+.market-item {{ display:inline-flex; align-items:center; gap:8px; padding:0 24px; color:#DDE5F0; font-size:12px; font-weight:600; white-space:nowrap; font-family:Consolas, monospace; }}
+.market-dot {{ width:5px; height:5px; border-radius:50%; background:{CDC_RED}; display:inline-block; }}
+.market-label {{ color:#8F9AAD; font-weight:600; text-transform:uppercase; }}
+.market-value {{ color:#FFFFFF; font-weight:700; }}
+.market-source {{ color:#8A95A5; font-size:10px; }}
+@keyframes marketFlow {{ from {{ transform:translateX(0); }} to {{ transform:translateX(-50%); }} }}
 .topbar {{
   display:flex; align-items:center; justify-content:space-between; gap:18px;
   background:#101419; color:#fff; border-bottom:2px solid {CDC_RED};
@@ -183,19 +193,32 @@ st.markdown(
 }}
 .hero {{ margin-bottom:14px; }}
 .hero-main {{
-  position:relative; min-height:154px; border-radius:10px; overflow:hidden; width:100%;
-  background:linear-gradient(135deg,#12161C 0%,#0D1015 68%,#170A0D 100%);
+  position:relative; min-height:318px; border-radius:10px; overflow:hidden; width:100%;
+  background:#0D1015;
   border:1px solid {LINE}; box-shadow:0 14px 44px rgba(0,0,0,.22);
 }}
 .hero-bg {{
-  display:none;
+  position:absolute; inset:0; z-index:0; display:block; background-size:cover; background-position:center;
+  opacity:0; transform:scale(1.02); filter:saturate(.82) contrast(1.05) brightness(.58); animation:cdcHeroFade 30s infinite;
 }}
+.hero-bg:nth-child(1) {{ animation-delay:0s; }}
+.hero-bg:nth-child(2) {{ animation-delay:10s; }}
+.hero-bg:nth-child(3) {{ animation-delay:20s; }}
 .hero-main::before {{
   content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background:linear-gradient(90deg,rgba(239,0,31,.12),transparent 46%);
+  background:
+    linear-gradient(90deg,rgba(6,8,11,.96) 0%,rgba(10,13,17,.82) 42%,rgba(10,13,17,.45) 72%,rgba(10,13,17,.30) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.22));
 }}
 .hero-main::after {{ display:none; }}
-.hero-content {{ position:relative; z-index:1; padding:20px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:154px; }}
+.hero-content {{ position:relative; z-index:1; padding:28px 32px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; min-height:318px; }}
+@keyframes cdcHeroFade {{
+  0% {{ opacity:0; transform:scale(1.04); }}
+  7% {{ opacity:1; }}
+  31% {{ opacity:1; transform:scale(1.015); }}
+  38% {{ opacity:0; }}
+  100% {{ opacity:0; transform:scale(1.04); }}
+}}
 .hero-brand-row {{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }}
 .hero-brand-chip {{ display:flex; align-items:center; gap:12px; background:rgba(5,5,5,.68); border:1px solid rgba(255,255,255,.13); border-radius:8px; padding:11px 14px; backdrop-filter:blur(10px); box-shadow:0 20px 44px rgba(0,0,0,.26); }}
 .hero-brand-chip img {{ height:54px; width:74px; object-fit:contain; }}
@@ -303,9 +326,8 @@ st.markdown(
   .grid4, .grid6, .sku-grid, .timeline, .playbook-grid, .spec-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:100%; }}
   .kcc-lockup {{ display:none; }}
-  .hero-main {{ min-height:190px; }}
+  .hero-main {{ min-height:340px; }}
   .hero-content {{ flex-direction:column; align-items:flex-start; }}
-  .data-strip {{ grid-template-columns:1fr; }}
   .h1 {{ font-size:34px; }}
 }}
 @media (max-width: 700px) {{
@@ -317,7 +339,7 @@ st.markdown(
   .cdc-emblem {{ height:42px; width:58px; }}
   .platform-title {{ font-size:13px; }}
   .platform-sub {{ font-size:9px; }}
-  .hero-main {{ min-height:220px; }}
+  .hero-main {{ min-height:360px; }}
   .hero-content {{ padding:18px 18px; }}
   .hero-brand-row {{ gap:10px; margin-bottom:12px; }}
   .h1 {{ font-size:28px; line-height:1.1; }}
@@ -1083,6 +1105,11 @@ pvc_delta = pct_delta(purchase["PVC"])
 cdc_emblem_image = CDC_TAGLINE_LOGO or image_b64("cdc_distributors_logo.png") or CDC_LOGO
 cdc_emblem = f'<img class="cdc-emblem" src="data:image/png;base64,{cdc_emblem_image}" alt="CDC Distributors">' if cdc_emblem_image else '<strong>CDC</strong>'
 kcc_partner = f'<img src="data:image/png;base64,{KCC_LOGO_WHITE}" alt="KCC Glass">' if KCC_LOGO_WHITE else "<strong>KCC GLASS</strong>"
+hero_slides = "".join(
+    f'<div class="hero-bg" style="background-image:url(\'data:image/png;base64,{image}\');"></div>'
+    for image in CDC_HERO_IMAGES
+    if image
+)
 data_chips = [
     ("SCFI", f"{scfi_now:,.0f}", "Source: freight index file"),
     ("PVC", f"{pvc_now:,.1f}", "Source: purchase index file"),
@@ -1103,6 +1130,31 @@ data_strip_html = "".join(
     for label, value, detail in data_chips
 )
 st.markdown(f'<div class="data-strip">{data_strip_html}</div>', unsafe_allow_html=True)
+ticker_items = [
+    ("SCFI", f"{scfi_now:,.0f}", "freight index file"),
+    ("PVC", f"{pvc_now:,.1f}", "purchase index file"),
+]
+dotp_clean = purchase["DOTP"].dropna() if "DOTP" in purchase else pd.Series(dtype=float)
+if not dotp_clean.empty:
+    ticker_items.append(("DOTP", f"{float(dotp_clean.iloc[-1]):,.1f}", "purchase index file"))
+if not usdkrw.empty:
+    usd_latest = float(usdkrw["USD/KRW"].dropna().iloc[-1])
+    usd_date = pd.to_datetime(usdkrw["date"].dropna().iloc[-1]).strftime("%Y-%m-%d")
+    ticker_items.insert(0, ("USD/KRW", f"{usd_latest:,.0f}", f"as of {usd_date} / FRED DEXKOUS"))
+ticker_items.append(("SHIPMENT DATA", f"As of {SHIPMENT_AS_OF}", SHIPMENT_SOURCE))
+
+market_html = "".join(
+    f"""
+<span class="market-item">
+  <span class="market-dot"></span>
+  <span class="market-label">{label}</span>
+  <span class="market-value">{value}</span>
+  <span class="market-source">{detail}</span>
+</span>
+"""
+    for label, value, detail in ticker_items
+)
+st.markdown(f'<div class="market-marquee"><div class="market-track"><div class="market-set">{market_html}</div><div class="market-set">{market_html}</div></div></div>', unsafe_allow_html=True)
 st.markdown(
     f"""
 <div class="topbar">
@@ -1133,9 +1185,10 @@ def render_hero() -> None:
         f"""
 <div class="hero">
   <div class="hero-main">
+    {hero_slides}
     <div class="hero-content">
       <div>
-        <div class="eyebrow">CDC Distributors · Permagrain Collection</div>
+        <div class="eyebrow">CDC Distributors / Permagrain Collection</div>
         <div class="h1">CDC Partner Portal</div>
         <div class="h-sub">
           A secure launch workspace for shipment visibility, payment follow-up, SKU readiness,
