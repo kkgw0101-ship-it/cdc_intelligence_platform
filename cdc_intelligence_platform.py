@@ -102,8 +102,15 @@ st.markdown(
 }}
 [data-testid="stSidebar"] {{ transform:none !important; visibility:visible !important; min-width:230px !important; width:230px !important; background:linear-gradient(180deg,#1A070A 0%,#11080A 58%,#070506 100%); border-right:1px solid rgba(239,0,31,.36); }}
 [data-testid="stSidebar"][aria-expanded="false"] {{ margin-left:0 !important; }}
-[data-testid="stMain"] {{ left:230px !important; width:calc(100% - 230px) !important; }}
-.block-container {{ padding:0.75rem 1.2rem 2rem 1.2rem; max-width:100%; width:100% !important; }}
+[data-testid="stMain"] {{ width:100% !important; max-width:none !important; flex:1 1 auto !important; }}
+[data-testid="stMain"] > div {{ max-width:none !important; }}
+.block-container {{
+  padding:0.75rem 1.2rem 2rem 1.2rem;
+  max-width:min(1680px, 100%) !important;
+  width:100% !important;
+  margin-left:0 !important;
+  margin-right:auto !important;
+}}
 * {{ font-variant-numeric: tabular-nums; letter-spacing:0; }}
 [data-testid="stSidebar"] * {{ color:#FFFFFF !important; }}
 [data-testid="stSidebar"] .stButton button,
@@ -147,7 +154,7 @@ st.markdown(
 }}
 .hero {{ margin-bottom:14px; }}
 .hero-main {{
-  position:relative; min-height:640px; border-radius:14px; overflow:hidden;
+  position:relative; min-height:640px; border-radius:14px; overflow:hidden; width:100%;
   background:#12070A;
   border:1px solid {LINE}; box-shadow:0 24px 80px rgba(0,0,0,.32);
 }}
@@ -261,7 +268,7 @@ st.markdown(
   .cdc-mark {{ width:190px; }}
   .timeless-mark {{ width:155px; }}
 }}
-@media (max-width: 1050px) {{
+@media (max-width: 860px) {{
   .care-grid {{ grid-template-columns:1fr; }}
   .grid4, .grid6, .sku-grid, .timeline {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:100%; }}
