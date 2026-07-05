@@ -1,6 +1,6 @@
 """
 CDC Intelligence Platform
-Customer-facing Streamlit portal concept for CDC / Timeless Designs Flooring.
+Customer-facing Streamlit portal concept for CDC and KCC Glass.
 """
 
 from __future__ import annotations
@@ -70,10 +70,10 @@ TIMELESS_LOGO = image_b64("timeless_designs_logo_crop.png") or image_b64("timele
 KCC_LOGO_WHITE = image_b64("logo_white_t.png")
 KCC_VIDEO_THUMB = image_b64("kcc_company_video_thumb.jpg")
 CDC_HERO_IMAGES = [
-    image_b64("cdc_hero_facility_aerial.png"),
     image_b64("cdc_hero_facility_parking.png"),
     image_b64("cdc_hero_facility_exterior.png"),
     image_b64("cdc_hero_team_event.png"),
+    image_b64("cdc_hero_facility_aerial.png"),
 ]
 FRED_API_KEY = get_secret("FRED_API_KEY", "")
 
@@ -85,11 +85,15 @@ MENU_ITEMS = ["Account Overview", "Order & Shipment Desk", "Permagrain SKU Room"
 if "view" not in st.session_state:
     st.session_state.view = MENU_ITEMS[0]
 
+if "text_size_mode" not in st.session_state:
+    st.session_state.text_size_mode = "기본"
+
+TEXT_SCALE = {"기본": 1.0, "크게": 1.08, "더 크게": 1.16}.get(st.session_state.text_size_mode, 1.0)
 
 st.markdown(
     f"""
 <style>
-[data-testid="stAppViewContainer"] {{ background:{MIST}; color:{INK}; }}
+[data-testid="stAppViewContainer"] {{ background:{MIST}; color:{INK}; --ui-scale:{TEXT_SCALE}; }}
 [data-testid="stHeader"] {{ background:transparent; height:0; }}
 #MainMenu, footer, [data-testid="stToolbar"] {{ visibility:hidden; }}
 
@@ -100,7 +104,7 @@ st.markdown(
 [data-testid="stSidebarCollapseButton"] {{
   display:none !important;
 }}
-[data-testid="stSidebar"] {{ transform:none !important; visibility:visible !important; min-width:230px !important; width:230px !important; background:linear-gradient(180deg,#1A070A 0%,#11080A 58%,#070506 100%); border-right:1px solid rgba(239,0,31,.36); }}
+[data-testid="stSidebar"] {{ transform:none !important; visibility:visible !important; min-width:230px !important; width:230px !important; background:linear-gradient(180deg,#160709 0%,#0E0708 58%,#050505 100%); border-right:1px solid rgba(239,0,31,.30); }}
 [data-testid="stSidebar"][aria-expanded="false"] {{ margin-left:0 !important; }}
 [data-testid="stMain"] {{ width:100% !important; max-width:none !important; flex:1 1 auto !important; }}
 [data-testid="stMain"] > div {{ max-width:none !important; }}
@@ -118,9 +122,12 @@ st.markdown(
   background:rgba(255,255,255,.06) !important; border:1px solid rgba(255,255,255,.10) !important;
   color:#fff !important; border-radius:7px !important; min-height:34px !important;
 }}
-.side-brand {{ font-weight:900; font-size:15px; letter-spacing:1.4px; margin:2px 0 4px; }}
-.side-sub {{ color:#D9BFC3 !important; font-size:11px; line-height:1.45; padding-bottom:14px; border-bottom:1px solid rgba(243,215,75,.22); margin-bottom:14px; }}
-[data-testid="stSidebar"] [role="radiogroup"] label {{ padding:8px 10px; border-radius:7px; margin:2px 0; font-size:13px; transition:background .15s; }}
+.sidebar-brand-block {{ text-align:center; padding:12px 0 18px; border-bottom:1px solid rgba(243,215,75,.18); margin-bottom:16px; }}
+.sidebar-logo-main {{ width:150px; max-width:100%; display:block; margin:0 auto 12px; background:#050505; border-radius:7px; padding:8px; border:1px solid rgba(239,0,31,.24); box-shadow:0 18px 40px rgba(0,0,0,.26); }}
+.side-brand {{ font-weight:900; font-size:calc(15px * var(--ui-scale)); letter-spacing:1.4px; margin:2px 0 4px; }}
+.side-sub {{ color:#B8AEB2 !important; font-size:calc(11px * var(--ui-scale)); line-height:1.45; }}
+.side-tool-label {{ color:#8F9AAA !important; font-size:10px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; margin:20px 0 8px; }}
+[data-testid="stSidebar"] [role="radiogroup"] label {{ padding:8px 10px; border-radius:7px; margin:2px 0; font-size:calc(13px * var(--ui-scale)); transition:background .15s; }}
 [data-testid="stSidebar"] [role="radiogroup"] label:hover {{ background:rgba(239,0,31,.16); }}
 .sb-nav-label {{ color:#D9BFC3 !important; font-size:10px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; margin:14px 0 6px 0; }}
 .sidebar-logo {{ width:96px; max-width:100%; background:#050505; border-radius:7px; padding:5px; margin-bottom:10px; border:1px solid rgba(243,215,75,.34); }}
@@ -135,16 +142,19 @@ st.markdown(
 @keyframes marketFlow {{ from {{ transform:translateX(0); }} to {{ transform:translateX(-50%); }} }}
 .topbar {{
   display:flex; align-items:center; justify-content:space-between; gap:18px;
-  background:linear-gradient(90deg,#090405 0%,#16080B 48%,#2B0B10 100%); color:#fff; border-bottom:2px solid {GOLD};
+  background:linear-gradient(90deg,#070405 0%,#130709 46%,#27090E 100%); color:#fff; border-bottom:2px solid {CDC_RED};
   border-top:1px solid rgba(239,0,31,.55);
   border-radius:8px; padding:12px 18px; margin-bottom:12px;
   box-shadow:0 18px 50px rgba(0,0,0,.24);
 }}
 .brand-lockup {{ display:flex; align-items:center; gap:14px; min-width:0; }}
-.cdc-mark {{ height:58px; width:210px; object-fit:contain; background:#FFFFFF; border-radius:7px; padding:8px 12px; }}
-.timeless-mark {{ height:44px; width:172px; object-fit:contain; background:#FFFFFF; border-radius:7px; padding:7px 10px; }}
-.partner-mark {{ display:flex; align-items:center; gap:8px; color:#E9D6B5; font-size:10px; font-weight:900; text-transform:uppercase; }}
-.partner-mark img {{ height:18px; width:auto; background:{PARTNER_NAVY}; border-radius:4px; padding:4px 6px; }}
+.cdc-emblem {{ height:48px; width:72px; object-fit:contain; background:#050505; border-radius:6px; padding:4px; border:1px solid rgba(239,0,31,.25); }}
+.platform-name {{ display:flex; flex-direction:column; gap:2px; }}
+.platform-title {{ color:#FFFFFF; font-size:18px; font-weight:900; letter-spacing:.5px; text-transform:uppercase; }}
+.platform-sub {{ color:#B8AEB2; font-size:11px; font-weight:800; text-transform:uppercase; }}
+.kcc-lockup {{ display:flex; align-items:center; gap:10px; margin-left:12px; padding-left:16px; border-left:1px solid rgba(255,255,255,.12); }}
+.kcc-lockup span {{ color:#D8DCE8; font-size:10px; font-weight:900; text-transform:uppercase; }}
+.kcc-lockup img {{ height:32px; width:auto; background:{PARTNER_NAVY}; border-radius:5px; padding:6px 10px; box-shadow:0 10px 24px rgba(0,0,0,.20); }}
 .top-meta {{ display:flex; gap:22px; align-items:center; text-align:right; }}
 .top-k {{ font-size:9px; color:#D9BFC3; text-transform:uppercase; font-weight:800; }}
 .top-v {{ font-size:13px; color:#fff; font-weight:900; font-family:Consolas, monospace; }}
@@ -154,13 +164,13 @@ st.markdown(
 }}
 .hero {{ margin-bottom:14px; }}
 .hero-main {{
-  position:relative; min-height:640px; border-radius:14px; overflow:hidden; width:100%;
+  position:relative; min-height:590px; border-radius:14px; overflow:hidden; width:100%;
   background:#12070A;
   border:1px solid {LINE}; box-shadow:0 24px 80px rgba(0,0,0,.32);
 }}
 .hero-bg {{
   position:absolute; inset:0; z-index:0; background-size:cover; background-position:center;
-  opacity:0; transform:scale(1.045); animation:cdcHeroFade 28s infinite;
+  opacity:0; transform:scale(1.025); filter:saturate(.92) contrast(1.08) brightness(.68); animation:cdcHeroFade 28s infinite;
 }}
 .hero-bg:nth-child(1) {{ animation-delay:0s; }}
 .hero-bg:nth-child(2) {{ animation-delay:7s; }}
@@ -169,8 +179,8 @@ st.markdown(
 .hero-main::before {{
   content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(circle at 84% 14%, rgba(243,215,75,.17), transparent 30%),
-    linear-gradient(90deg, rgba(7,4,5,.96) 0%, rgba(17,7,9,.82) 38%, rgba(17,7,9,.44) 70%, rgba(7,4,5,.22) 100%);
+    radial-gradient(circle at 84% 14%, rgba(239,0,31,.16), transparent 30%),
+    linear-gradient(90deg, rgba(5,5,5,.96) 0%, rgba(17,7,9,.88) 39%, rgba(17,7,9,.60) 70%, rgba(7,4,5,.38) 100%);
 }}
 .hero-main::after {{
   content:""; position:absolute; inset:-35%; z-index:0;
@@ -190,17 +200,23 @@ st.markdown(
   70%, 100% {{ transform:translateX(55%); opacity:0; }}
 }}
 .hero-content {{ position:absolute; inset:0; z-index:1; padding:54px 62px; display:flex; flex-direction:column; justify-content:space-between; }}
-.hero-brand-row {{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }}
-.hero-cdc-logo {{ height:76px; width:260px; object-fit:contain; background:#FFFFFF; border-radius:8px; padding:10px 14px; border:1px solid rgba(243,215,75,.30); }}
-.hero-timeless-logo {{ height:62px; width:230px; object-fit:contain; background:#fff; border-radius:8px; padding:8px 12px; }}
-.eyebrow {{ color:{GOLD}; font-size:13px; text-transform:uppercase; font-weight:900; letter-spacing:3px; }}
-.h1 {{ color:#fff; font-size:54px; line-height:1.04; font-weight:900; max-width:820px; margin-top:18px; }}
-.h-sub {{ color:#DDE7F0; font-size:16px; line-height:1.6; max-width:760px; margin-top:18px; }}
+.hero-brand-row {{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }}
+.hero-brand-chip {{ display:flex; align-items:center; gap:12px; background:rgba(5,5,5,.68); border:1px solid rgba(255,255,255,.13); border-radius:8px; padding:11px 14px; backdrop-filter:blur(10px); box-shadow:0 20px 44px rgba(0,0,0,.26); }}
+.hero-brand-chip img {{ height:54px; width:74px; object-fit:contain; }}
+.hero-brand-text {{ display:flex; flex-direction:column; gap:2px; }}
+.hero-brand-main {{ color:#fff; font-size:15px; font-weight:900; text-transform:uppercase; letter-spacing:.8px; }}
+.hero-brand-sub {{ color:#AFB8C7; font-size:10px; font-weight:900; text-transform:uppercase; }}
+.hero-kcc-chip {{ display:flex; align-items:center; gap:10px; background:rgba(14,35,114,.72); border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:12px 14px; }}
+.hero-kcc-chip img {{ height:34px; width:auto; }}
+.hero-kcc-chip span {{ color:#E4E8F5; font-size:10px; font-weight:900; text-transform:uppercase; }}
+.eyebrow {{ color:{GOLD}; font-size:calc(13px * var(--ui-scale)); text-transform:uppercase; font-weight:900; letter-spacing:3px; }}
+.h1 {{ color:#fff; font-size:calc(52px * var(--ui-scale)); line-height:1.04; font-weight:900; max-width:860px; margin-top:18px; }}
+.h-sub {{ color:#DDE7F0; font-size:calc(16px * var(--ui-scale)); line-height:1.6; max-width:760px; margin-top:18px; }}
 .hero-bottom {{ display:flex; flex-direction:column; gap:18px; }}
 .hero-actions {{ display:flex; gap:8px; flex-wrap:wrap; }}
 .pill {{
   display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(232,179,57,.48);
-  background:rgba(12,18,29,.72); color:#fff; border-radius:999px; padding:9px 14px; font-size:12px; font-weight:900;
+  background:rgba(5,5,5,.70); color:#fff; border-radius:999px; padding:9px 14px; font-size:calc(12px * var(--ui-scale)); font-weight:900;
 }}
 .hero-signal-grid {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; max-width:900px; }}
 .signal {{
@@ -208,38 +224,38 @@ st.markdown(
   display:flex; flex-direction:column; justify-content:center;
   backdrop-filter:blur(8px); min-height:116px; box-shadow:0 14px 36px rgba(0,0,0,.28);
 }}
-.signal-k {{ color:#9AA4B4; font-size:10px; text-transform:uppercase; font-weight:900; }}
-.signal-v {{ color:{INK}; font-size:21px; font-weight:900; margin-top:2px; font-family:Consolas, monospace; }}
-.signal-d {{ color:#8A95A5; font-size:11px; margin-top:3px; }}
+.signal-k {{ color:#9AA4B4; font-size:calc(10px * var(--ui-scale)); text-transform:uppercase; font-weight:900; }}
+.signal-v {{ color:{INK}; font-size:calc(21px * var(--ui-scale)); font-weight:900; margin-top:2px; font-family:Consolas, monospace; }}
+.signal-d {{ color:#8A95A5; font-size:calc(11px * var(--ui-scale)); margin-top:3px; }}
 .grid4 {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:12px; }}
 .grid6 {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:12px; }}
 .metric {{
   background:{PANEL}; border:1px solid {LINE}; border-radius:8px; padding:14px;
   min-height:98px;
 }}
-.metric-k {{ color:#8A95A5; font-size:10px; text-transform:uppercase; font-weight:900; }}
-.metric-v {{ color:{INK}; font-size:25px; line-height:1.1; font-weight:900; margin-top:8px; font-family:Consolas, monospace; }}
-.metric-c {{ color:#8A95A5; font-size:11px; margin-top:6px; }}
+.metric-k {{ color:#8A95A5; font-size:calc(10px * var(--ui-scale)); text-transform:uppercase; font-weight:900; }}
+.metric-v {{ color:{INK}; font-size:calc(25px * var(--ui-scale)); line-height:1.1; font-weight:900; margin-top:8px; font-family:Consolas, monospace; }}
+.metric-c {{ color:#8A95A5; font-size:calc(11px * var(--ui-scale)); margin-top:6px; }}
 .next-action {{
   background:{PANEL}; border:1px solid {LINE}; border-left:4px solid {GOLD};
   border-radius:8px; padding:14px; margin-bottom:12px;
 }}
-.next-action-k {{ color:#8A95A5; font-size:10px; text-transform:uppercase; font-weight:900; }}
-.next-action-v {{ color:{INK}; font-size:20px; font-weight:900; margin-top:4px; }}
-.next-action-d {{ color:#8A95A5; font-size:12px; margin-top:5px; line-height:1.45; }}
+.next-action-k {{ color:#8A95A5; font-size:calc(10px * var(--ui-scale)); text-transform:uppercase; font-weight:900; }}
+.next-action-v {{ color:{INK}; font-size:calc(20px * var(--ui-scale)); font-weight:900; margin-top:4px; }}
+.next-action-d {{ color:#8A95A5; font-size:calc(12px * var(--ui-scale)); margin-top:5px; line-height:1.45; }}
 .timeline {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }}
 .step {{ background:{PANEL}; border:1px solid {LINE}; border-radius:8px; padding:13px; min-height:128px; }}
-.step-k {{ color:{GOLD}; font-size:11px; font-weight:900; text-transform:uppercase; }}
-.step-v {{ color:{INK}; font-size:15px; font-weight:900; margin-top:7px; line-height:1.25; }}
-.step-d {{ color:#8A95A5; font-size:12px; line-height:1.45; margin-top:7px; }}
-.meaning {{ background:{PANEL2}; border:1px solid {LINE}; border-left:4px solid {GOLD}; border-radius:8px; padding:12px; color:{INK}; font-size:13px; line-height:1.55; }}
+.step-k {{ color:{GOLD}; font-size:calc(11px * var(--ui-scale)); font-weight:900; text-transform:uppercase; }}
+.step-v {{ color:{INK}; font-size:calc(15px * var(--ui-scale)); font-weight:900; margin-top:7px; line-height:1.25; }}
+.step-d {{ color:#8A95A5; font-size:calc(12px * var(--ui-scale)); line-height:1.45; margin-top:7px; }}
+.meaning {{ background:{PANEL2}; border:1px solid {LINE}; border-left:4px solid {GOLD}; border-radius:8px; padding:12px; color:{INK}; font-size:calc(13px * var(--ui-scale)); line-height:1.55; }}
 .panel {{ background:{PANEL}; border:1px solid {LINE}; border-radius:8px; overflow:hidden; margin-bottom:12px; }}
 .panel-h {{
   display:flex; justify-content:space-between; align-items:center; gap:12px;
   padding:12px 14px; border-bottom:1px solid {LINE}; border-left:4px solid {GOLD};
   background:linear-gradient(90deg,rgba(239,0,31,.18),rgba(106,32,40,.22),{PANEL2});
 }}
-.panel-t {{ font-weight:900; color:{INK}; font-size:13px; }}
+.panel-t {{ font-weight:900; color:{INK}; font-size:calc(13px * var(--ui-scale)); }}
 .panel-m {{ color:#8A95A5; font-size:10px; font-family:Consolas, monospace; }}
 .panel-b {{ padding:14px; }}
 .care-grid {{ display:grid; grid-template-columns:1.05fr .95fr; gap:12px; }}
@@ -247,12 +263,12 @@ st.markdown(
 .sku {{ border:1px solid {LINE}; border-radius:8px; overflow:hidden; background:{PANEL}; min-height:238px; }}
 .swatch {{ height:112px; background-size:cover; border-bottom:1px solid {LINE}; }}
 .sku-body {{ padding:12px; }}
-.sku-code {{ color:{CDC_RED}; font-size:11px; font-weight:900; font-family:Consolas, monospace; }}
-.sku-name {{ color:{INK}; font-size:18px; font-weight:900; margin-top:2px; }}
-.sku-copy {{ color:#8A95A5; font-size:12px; line-height:1.45; margin-top:8px; min-height:50px; }}
+.sku-code {{ color:{CDC_RED}; font-size:calc(11px * var(--ui-scale)); font-weight:900; font-family:Consolas, monospace; }}
+.sku-name {{ color:{INK}; font-size:calc(18px * var(--ui-scale)); font-weight:900; margin-top:2px; }}
+.sku-copy {{ color:#8A95A5; font-size:calc(12px * var(--ui-scale)); line-height:1.45; margin-top:8px; min-height:50px; }}
 .tagline {{ display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }}
 .tag {{ border:1px solid {LINE}; background:{PANEL2}; color:#C9D3EA; border-radius:999px; padding:3px 7px; font-size:10px; font-weight:800; }}
-.brief {{ background:{PANEL2}; border:1px solid {LINE}; border-radius:8px; padding:12px; color:#D6DEE8; font-size:13px; line-height:1.55; }}
+.brief {{ background:{PANEL2}; border:1px solid {LINE}; border-radius:8px; padding:12px; color:#D6DEE8; font-size:calc(13px * var(--ui-scale)); line-height:1.55; }}
 .alert {{ border-left:4px solid {GREEN}; }}
 .alert.warn {{ border-left-color:{ORANGE}; }}
 .alert.risk {{ border-left-color:{RED}; }}
@@ -261,22 +277,26 @@ st.markdown(
   font-weight:900; font-size:12px; text-decoration:none; margin-right:6px;
 }}
 .link-btn.secondary {{ background:{PANEL2}; color:#FFFFFF !important; border:1px solid {LINE}; }}
-.note {{ color:#8A95A5; font-size:11px; line-height:1.55; }}
+.note {{ color:#8A95A5; font-size:calc(11px * var(--ui-scale)); line-height:1.55; }}
 .small-table {{ font-size:12px; }}
+.dark-table-scroll {{ width:100%; overflow:auto; border:1px solid {LINE}; border-radius:8px; background:#100B0D; }}
+.dark-data-table {{ width:100%; border-collapse:collapse; color:#E8EDF6; font-size:calc(12px * var(--ui-scale)); }}
+.dark-data-table thead th {{ background:#210B10; color:#F5F7FB; text-align:left; padding:10px 11px; border-bottom:1px solid rgba(239,0,31,.30); font-weight:900; white-space:nowrap; }}
+.dark-data-table tbody td {{ background:#120D0F; color:#DDE5F0; padding:9px 11px; border-top:1px solid rgba(255,255,255,.06); vertical-align:top; }}
+.dark-data-table tbody tr:nth-child(even) td {{ background:#171012; }}
+.dark-data-table tbody tr:hover td {{ background:#211418; }}
 @media (max-width: 1400px) {{
   .top-meta {{ display:none; }}
-  .cdc-mark {{ width:190px; }}
-  .timeless-mark {{ width:155px; }}
+  .platform-title {{ font-size:16px; }}
+  .kcc-lockup img {{ height:28px; }}
 }}
 @media (max-width: 860px) {{
   .care-grid {{ grid-template-columns:1fr; }}
   .grid4, .grid6, .sku-grid, .timeline {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   .hero-signal-grid {{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:100%; }}
-  .partner-mark {{ display:none; }}
+  .kcc-lockup {{ display:none; }}
   .hero-main {{ min-height:1140px; }}
   .hero-brand-row {{ flex-direction:column; align-items:flex-start; }}
-  .hero-cdc-logo {{ width:250px; }}
-  .hero-timeless-logo {{ width:190px; }}
   .h1 {{ font-size:34px; }}
 }}
 @media (max-width: 700px) {{
@@ -285,14 +305,12 @@ st.markdown(
   .topbar {{ min-height:58px; padding:9px 12px; }}
   .top-meta {{ display:none; }}
   .brand-lockup {{ flex-direction:row; align-items:center; text-align:left; gap:8px; }}
-  .timeless-mark {{ display:none; }}
-  .partner-mark {{ font-size:9px; }}
-  .cdc-mark {{ height:42px; width:145px; padding:6px 9px; }}
+  .cdc-emblem {{ height:42px; width:58px; }}
+  .platform-title {{ font-size:13px; }}
+  .platform-sub {{ font-size:9px; }}
   .hero-main {{ min-height:1140px; }}
   .hero-content {{ padding:24px 24px; }}
   .hero-brand-row {{ gap:10px; margin-bottom:12px; }}
-  .hero-cdc-logo {{ height:58px; width:190px; padding:8px 10px; }}
-  .hero-timeless-logo {{ height:48px; width:160px; }}
   .h1 {{ font-size:28px; line-height:1.1; }}
   .h-sub {{ font-size:13px; }}
 }}
@@ -531,14 +549,21 @@ def line_chart(frame: pd.DataFrame, y_cols: list[str], title: str, height: int =
         height=height,
         margin=dict(l=12, r=12, t=32, b=10),
         title=dict(text=title, font=dict(size=13, color=INK)),
-        paper_bgcolor="#FFFFFF",
-        plot_bgcolor="#FFFFFF",
+        paper_bgcolor=PANEL,
+        plot_bgcolor=PANEL,
+        font=dict(color="#DDE5F0"),
+        colorway=["#F3D74B", "#EF001F", "#7AA7FF", "#4ADE80"],
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=11)),
-        xaxis=dict(showgrid=True, gridcolor="#EEF2F7", zeroline=False),
-        yaxis=dict(showgrid=True, gridcolor="#EEF2F7", zeroline=False),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=11, color="#DDE5F0")),
+        xaxis=dict(showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4")),
+        yaxis=dict(showgrid=True, gridcolor="#2B1D22", zeroline=False, tickfont=dict(color="#9AA4B4")),
     )
     return fig
+
+
+def render_table(frame: pd.DataFrame) -> None:
+    html = frame.to_html(index=False, escape=False, classes="dark-data-table", border=0)
+    st.markdown(f'<div class="dark-table-scroll">{html}</div>', unsafe_allow_html=True)
 
 
 def create_customer_brief_pdf() -> bytes:
@@ -649,10 +674,15 @@ def simple_pdf_bytes(lines: list[str]) -> bytes:
 
 with st.sidebar:
     sidebar_logo = CDC_TAGLINE_LOGO or CDC_LOGO
-    sidebar_cdc = f'<img src="data:image/png;base64,{sidebar_logo}" style="width:150px;max-width:100%;background:#050505;border-radius:7px;padding:5px;margin-bottom:8px;" alt="CDC Distributors">' if sidebar_logo else ""
-    st.markdown(sidebar_cdc + '<div class="side-brand">CDC PRIVATE DESK</div>', unsafe_allow_html=True)
+    sidebar_cdc = f'<img class="sidebar-logo-main" src="data:image/png;base64,{sidebar_logo}" alt="CDC Distributors">' if sidebar_logo else ""
     st.markdown(
-        '<div class="side-sub">Timeless Designs brand workspace<br>Permagrain Collection launch care</div>',
+        f"""
+<div class="sidebar-brand-block">
+  {sidebar_cdc}
+  <div class="side-brand">CDC PRIVATE DESK</div>
+  <div class="side-sub">Permagrain account intelligence<br>KCC Glass managed workspace</div>
+</div>
+""",
         unsafe_allow_html=True,
     )
     view = st.radio(
@@ -664,21 +694,17 @@ with st.sidebar:
     order_upload = None
     shipment_upload = None
     if CUSTOMER_SHARE_MODE:
-        st.markdown("#### Review Version")
-        st.caption("Prepared for CDC and Timeless Designs review.")
-        st.caption(f"Updated {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        st.markdown('<div class="side-tool-label">Text Size</div>', unsafe_allow_html=True)
+        st.radio(
+            "Text Size",
+            ["기본", "크게", "더 크게"],
+            key="text_size_mode",
+            label_visibility="collapsed",
+        )
     else:
         st.markdown("#### Data Mode")
         order_upload = st.file_uploader("Approved order data", type=["csv"], help="Optional: upload approved order data for this workspace.")
         shipment_upload = st.file_uploader("Approved shipment data", type=["csv"], help="Optional: upload approved shipment data for this workspace.")
-    st.download_button(
-        "Download Customer Brief PDF",
-        data=create_customer_brief_pdf(),
-        file_name="CDC_Permagrain_Customer_Brief.pdf",
-        mime="application/pdf",
-        width="stretch",
-    )
-    st.caption("Customer review workspace for the Permagrain launch program.")
 
 
 try:
@@ -731,9 +757,9 @@ pvc_now = float(purchase["PVC"].dropna().iloc[-1])
 pvc_delta = pct_delta(purchase["PVC"])
 
 
-cdc_logo = f'<img class="cdc-mark" src="data:image/png;base64,{CDC_LOGO}" alt="CDC Distributors">' if CDC_LOGO else '<strong>CDC</strong>'
-timeless_logo = f'<img class="timeless-mark" src="data:image/png;base64,{TIMELESS_LOGO}" alt="Timeless Designs">' if TIMELESS_LOGO else '<strong>Timeless Designs</strong>'
-kcc_partner = f'<img src="data:image/png;base64,{KCC_LOGO_WHITE}" alt="KCC Glass">' if KCC_LOGO_WHITE else "<span>KCC GLASS</span>"
+cdc_emblem_image = CDC_TAGLINE_LOGO or image_b64("cdc_distributors_logo.png") or CDC_LOGO
+cdc_emblem = f'<img class="cdc-emblem" src="data:image/png;base64,{cdc_emblem_image}" alt="CDC Distributors">' if cdc_emblem_image else '<strong>CDC</strong>'
+kcc_partner = f'<img src="data:image/png;base64,{KCC_LOGO_WHITE}" alt="KCC Glass">' if KCC_LOGO_WHITE else "<strong>KCC GLASS</strong>"
 hero_slides = "".join(
     f'<div class="hero-bg" style="background-image:url(\'data:image/png;base64,{image}\');"></div>'
     for image in CDC_HERO_IMAGES
@@ -756,13 +782,16 @@ st.markdown(
     f"""
 <div class="topbar">
   <div class="brand-lockup">
-    {cdc_logo}
-    {timeless_logo}
-    <div class="partner-mark"><span>Strategic manufacturing partner</span>{kcc_partner}</div>
+    {cdc_emblem}
+    <div class="platform-name">
+      <div class="platform-title">CDC Intelligence Platform</div>
+      <div class="platform-sub">Permagrain account command center</div>
+    </div>
+    <div class="kcc-lockup"><span>Managed with</span>{kcc_partner}</div>
   </div>
   <div class="top-meta">
     <div><div class="top-k">Company</div><div class="top-v">CDC Distributors</div></div>
-    <div><div class="top-k">Brand</div><div class="top-v">Timeless Designs</div></div>
+    <div><div class="top-k">Partner</div><div class="top-v">KCC Glass</div></div>
     <div><div class="top-k">Collection</div><div class="top-v">Permagrain Collection</div></div>
     <div><div class="top-k">Updated</div><div class="top-v">{datetime.now().strftime('%Y-%m-%d %H:%M')}</div></div>
   </div>
@@ -783,20 +812,26 @@ def render_hero() -> None:
     <div class="hero-content">
       <div>
         <div class="hero-brand-row">
-          {cdc_logo.replace('cdc-mark', 'hero-cdc-logo')}
-          {timeless_logo.replace('timeless-mark', 'hero-timeless-logo')}
+          <div class="hero-brand-chip">
+            {cdc_emblem.replace('cdc-emblem', 'hero-cdc-emblem')}
+            <div class="hero-brand-text">
+              <div class="hero-brand-main">CDC Distributors</div>
+              <div class="hero-brand-sub">Private account workspace</div>
+            </div>
+          </div>
+          <div class="hero-kcc-chip"><span>Strategic manufacturing partner</span>{kcc_partner}</div>
         </div>
-        <div class="eyebrow">Private account command center</div>
-        <div class="h1">CDC x Timeless Designs Permagrain Intelligence Platform</div>
+        <div class="eyebrow">KCC Glass Managed Account Command Center</div>
+        <div class="h1">CDC Permagrain Intelligence Platform</div>
         <div class="h-sub">
-          Built for CDC Distributors and the Timeless Designs team: Permagrain orders, shipment visibility,
-          SKU launch readiness, ESG support, and market signals in one customer-specific workspace.
+          Built for CDC Distributors as a KCC Glass-managed workspace: Permagrain shipment visibility,
+          payment follow-up, SKU launch readiness, ESG support, and market signals in one customer-specific platform.
         </div>
       </div>
       <div class="hero-bottom">
         <div class="hero-actions">
           <span class="pill">CDC order desk</span>
-          <span class="pill">Timeless sales support</span>
+          <span class="pill">KCC Glass support</span>
           <span class="pill">Permagrain SKU room</span>
           <span class="pill">FRED + freight + PVC signals</span>
         </div>
@@ -900,11 +935,11 @@ if view == "Account Overview":
 """,
             unsafe_allow_html=True,
         )
-        st.dataframe(credit, hide_index=True, width="stretch")
+        render_table(credit)
         close_panel()
     with right:
         panel("Next 30 Days", "care actions")
-        st.dataframe(next_30_days, hide_index=True, width="stretch")
+        render_table(next_30_days)
         close_panel()
 
     panel("CDC-Facing Message", "copy block")
@@ -932,7 +967,7 @@ elif view == "Order & Shipment Desk":
 """,
         unsafe_allow_html=True,
     )
-    st.dataframe(order_shipment, hide_index=True, width="stretch")
+    render_table(order_shipment)
     st.download_button(
         "Download order & shipment desk",
         order_shipment.to_csv(index=False).encode("utf-8-sig"),
@@ -943,7 +978,7 @@ elif view == "Order & Shipment Desk":
     close_panel()
 
     panel("Shipment Group Summary", "1st / 2nd / 3rd")
-    st.dataframe(orders, hide_index=True, width="stretch")
+    render_table(orders)
     close_panel()
 
 elif view == "Permagrain SKU Room":
@@ -953,12 +988,11 @@ elif view == "Permagrain SKU Room":
 <div class="brief">
   Use this section as CDC's launch-room view: confirmed SKUs, pending SKU, specs, carton artwork,
   label, hand board, 1' cut sample, and launch readiness.
-  Brand reference: <a href="{TIMELESS_URL}" target="_blank" rel="noopener noreferrer">Timeless Designs Flooring</a>.
 </div>
 """,
         unsafe_allow_html=True,
     )
-    st.dataframe(sku_readiness, hide_index=True, width="stretch")
+    render_table(sku_readiness)
     close_panel()
 
     panel("Permagrain Design View", "6 launch visuals")
@@ -990,7 +1024,7 @@ elif view == "Permagrain SKU Room":
         ],
         columns=["Use Case", "Hero SKUs", "How CDC Can Use It"],
     )
-    st.dataframe(notes, hide_index=True, width="stretch")
+    render_table(notes)
     close_panel()
 
 elif view == "Market Signal for CDC":
@@ -1014,7 +1048,7 @@ elif view == "Market Signal for CDC":
         ],
         columns=["Signal", "Current Read", "What this means for CDC"],
     )
-    st.dataframe(signal_rows, hide_index=True, width="stretch")
+    render_table(signal_rows)
     st.markdown(
         """
 <div class="meaning"><b>What this means for CDC:</b> Permagrain should be managed with weekly shipment visibility, practical SKU prioritization, and early replenishment discussion when freight or raw-material signals begin to move.</div>
@@ -1073,7 +1107,7 @@ elif view == "Next 30 Days":
     close_panel()
 
     panel("30-Day Action Table", "shareable operating plan")
-    st.dataframe(next_30_days, hide_index=True, width="stretch")
+    render_table(next_30_days)
     close_panel()
 
 elif view == "ESG & Growth Kit":
@@ -1104,7 +1138,7 @@ elif view == "ESG & Growth Kit":
             ],
             columns=["Theme", "CDC Sales Use"],
         )
-        st.dataframe(esg, hide_index=True, width="stretch")
+        render_table(esg)
         close_panel()
     with c2:
         panel("Growth Roadmap", "lead CDC to larger account status")
@@ -1117,7 +1151,7 @@ elif view == "ESG & Growth Kit":
             ],
             columns=["Phase", "Focus", "What It Means"],
         )
-        st.dataframe(roadmap, hide_index=True, width="stretch")
+        render_table(roadmap)
         close_panel()
 
         panel("What to Ask CDC Next", "conversation prompts")
@@ -1135,6 +1169,6 @@ elif view == "ESG & Growth Kit":
         close_panel()
 
 st.markdown(
-    '<div class="note">Prepared as a customer review workspace for CDC Distributors, Timeless Designs, and the Permagrain Collection launch program.</div>',
+    '<div class="note">Prepared as a CDC account intelligence workspace managed with KCC Glass for the Permagrain Collection launch program.</div>',
     unsafe_allow_html=True,
 )
